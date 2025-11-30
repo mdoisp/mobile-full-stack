@@ -14,8 +14,8 @@ const studentsRouter = Router();
 // Todas as rotas requerem autenticação
 studentsRouter.use(authenticate);
 
-// GET - Admin, Secretaria e Professor podem ver todos
-studentsRouter.get('/', authorize('admin', 'secretaria', 'professor'), getAllStudents);
+// GET - Admin, Secretaria, Professor e Estudante podem acessar (cada um vê conforme suas permissões)
+studentsRouter.get('/', authorize('admin', 'secretaria', 'professor', 'estudante'), getAllStudents);
 
 // GET by ID - Todos podem ver (estudante vê só o próprio)
 studentsRouter.get('/:id', getStudentById);

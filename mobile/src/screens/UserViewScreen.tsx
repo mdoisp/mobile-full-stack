@@ -146,7 +146,8 @@ export default function UserViewScreen({ route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5'
+    backgroundColor: '#f5f5f5',
+    paddingBottom: 20
   },
   centered: {
     flex: 1,

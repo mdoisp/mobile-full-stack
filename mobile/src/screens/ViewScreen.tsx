@@ -96,7 +96,11 @@ export default function ViewScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f5f5f5',
+    paddingBottom: 20
+  },
   section: { 
     backgroundColor: '#fff', 
     padding: 16, 
