@@ -64,6 +64,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await storage.saveUser(userData);
       
       setUser(userData);
+
+      // Sincronizar o banco de dados do backend após login
+      try {
+        const currentDbType = await storage.getDatabaseType();
+        if (currentDbType) {
+          await api.post('/auth/switch-db', { dbType: currentDbType });
+          console.log('Backend database synced to:', currentDbType);
+        }
+      } catch (dbError) {
+        console.error('Error syncing database type:', dbError);
+      }
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
     }
@@ -88,7 +99,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await api.post('/auth/switch-db', { dbType: newDbType });
       await storage.saveDatabaseType(newDbType);
       setDbType(newDbType);
+      console.log('Database switched to:', newDbType);
     } catch (error: any) {
+      console.error('Error switching database:', error);
       throw new Error(error.response?.data?.message || 'Failed to switch database');
     }
   }

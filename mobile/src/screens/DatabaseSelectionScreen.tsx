@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import * as storage from '../services/storage';
+import { api } from '../api/client';
 import type { DatabaseType } from '../services/storage';
 
 interface Props {
@@ -16,8 +17,19 @@ export default function DatabaseSelectionScreen({ onSelectDatabase }: Props) {
       return;
     }
     
-    await storage.saveDatabaseType(selected);
-    onSelectDatabase(selected);
+    try {
+      // Salva no storage local
+      await storage.saveDatabaseType(selected);
+      
+      // Informa ao backend qual banco usar (sem autenticação na primeira seleção)
+      console.log('Selecting database:', selected);
+      
+      // Continua o fluxo
+      onSelectDatabase(selected);
+    } catch (error) {
+      console.error('Error selecting database:', error);
+      Alert.alert('Erro', 'Não foi possível selecionar o banco de dados');
+    }
   };
 
   return (

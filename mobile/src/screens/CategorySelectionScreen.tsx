@@ -101,19 +101,6 @@ export default function CategorySelectionScreen() {
             : 'Escolha qual categoria deseja acessar'}
         </Text>
 
-        <View style={styles.categoriesContainer}>
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category.key}
-              style={[styles.categoryCard, { backgroundColor: category.color }]}
-              onPress={() => handleCategoryPress(category.key)}
-            >
-              <Text style={styles.categoryIcon}>{category.icon}</Text>
-              <Text style={styles.categoryTitle}>{category.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
         {user?.role === 'admin' && (
           <View style={styles.dbSection}>
             <Text style={styles.dbLabel}>Banco de Dados Ativo</Text>
@@ -128,6 +115,19 @@ export default function CategorySelectionScreen() {
             </TouchableOpacity>
           </View>
         )}
+
+        <View style={styles.categoriesContainer}>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category.key}
+              style={[styles.categoryCard, { backgroundColor: category.color }]}
+              onPress={() => handleCategoryPress(category.key)}
+            >
+              <Text style={styles.categoryIcon}>{category.icon}</Text>
+              <Text style={styles.categoryTitle}>{category.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -182,11 +182,13 @@ const styles = StyleSheet.create({
     flex: 1
   },
   dbSection: {
-    marginTop: 30,
-    padding: 20,
+    marginBottom: 25,
+    padding: 15,
     backgroundColor: '#fff',
     borderRadius: 12,
-    alignItems: 'center'
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0'
   },
   dbLabel: {
     fontSize: 14,
