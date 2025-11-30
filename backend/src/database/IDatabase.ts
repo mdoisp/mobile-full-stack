@@ -5,6 +5,7 @@ export interface IUser {
   password: string;
   role: 'admin' | 'secretaria' | 'professor' | 'estudante';
   name: string;
+  photoUrl?: string;
   createdAt?: Date;
 }
 

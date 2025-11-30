@@ -7,6 +7,7 @@ const userSchema = new Schema<IUser>({
   password: { type: String, required: true },
   role: { type: String, required: true, enum: ['admin', 'secretaria', 'professor', 'estudante'] },
   name: { type: String, required: true },
+  photoUrl: { type: String, required: false },
 }, { timestamps: true });
 
 const studentSchema = new Schema<IStudent>({

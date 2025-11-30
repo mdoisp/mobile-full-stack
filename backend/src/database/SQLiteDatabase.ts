@@ -29,6 +29,7 @@ export class SQLiteDatabase implements IDatabase {
         password TEXT NOT NULL,
         role TEXT NOT NULL CHECK(role IN ('admin', 'secretaria', 'professor', 'estudante')),
         name TEXT NOT NULL,
+        photoUrl TEXT,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -62,9 +63,9 @@ export class SQLiteDatabase implements IDatabase {
     
     const id = this.generateId();
     const stmt = this.db.prepare(
-      'INSERT INTO users (id, email, password, role, name) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO users (id, email, password, role, name, photoUrl) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    stmt.run(id, user.email, user.password, user.role, user.name);
+    stmt.run(id, user.email, user.password, user.role, user.name, user.photoUrl || null);
     
     return { id, ...user, createdAt: new Date() };
   }

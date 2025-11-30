@@ -4,6 +4,7 @@ import { DatabaseFactory } from './database/DatabaseFactory.js';
 import authRouter from './routes/auth.routes.js';
 import studentsRouter from './routes/students.routes.js';
 import gradesRouter from './routes/grades.routes.js';
+import usersRouter from './routes/users.routes.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ await DatabaseFactory.initialize('mongodb', MONGO_URL, './database.sqlite');
 app.use('/auth', authRouter);
 app.use('/students', studentsRouter);
 app.use('/grades', gradesRouter);
+app.use('/users', usersRouter);
 
 app.get('/', (req, res) => {
     res.json({ 

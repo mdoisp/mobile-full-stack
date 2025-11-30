@@ -37,6 +37,15 @@ export interface GradeDTO {
   createdAt?: Date;
 }
 
+export interface UserDTO {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'secretaria' | 'professor' | 'estudante';
+  photoUrl?: string;
+  createdAt?: Date;
+}
+
 // Students API
 export async function fetchStudents(): Promise<StudentDTO[]> {
   const { data } = await api.get<StudentDTO[]>('/students');
@@ -87,4 +96,24 @@ export async function deleteGrade(id: string): Promise<void> {
   await api.delete(`/grades/${id}`);
 }
 
+// Users API
+export async function getMyProfile(): Promise<UserDTO> {
+  const { data } = await api.get<UserDTO>('/users/me');
+  return data;
+}
+
+export async function updateMyProfile(payload: { name?: string; photoUrl?: string }): Promise<UserDTO> {
+  const { data } = await api.put<UserDTO>('/users/me', payload);
+  return data;
+}
+
+export async function getAllUsers(): Promise<UserDTO[]> {
+  const { data } = await api.get<UserDTO[]>('/users');
+  return data;
+}
+
+export async function getUserById(id: string): Promise<UserDTO> {
+  const { data } = await api.get<UserDTO>(`/users/${id}`);
+  return data;
+}
 
