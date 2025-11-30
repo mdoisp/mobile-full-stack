@@ -41,3 +41,7 @@ export const getDatabaseType = async (): Promise<DatabaseType | null> => {
 export const clearAuth = async (): Promise<void> => {
   await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, DB_TYPE_KEY]);
 };
+
+export const clearAll = async (): Promise<void> => {
+  await AsyncStorage.clear();
+};

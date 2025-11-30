@@ -10,6 +10,7 @@ interface AuthContextData {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   switchDatabase: (newDbType: DatabaseType) => Promise<void>;
+  resetToDbSelection: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -74,6 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   }
 
+  async function resetToDbSelection() {
+    // Limpa tudo e volta para seleção de banco
+    await storage.clearAll();
+    delete api.defaults.headers.common['Authorization'];
+    setUser(null);
+    setDbType('mongodb'); // Reset para default
+  }
+
   async function switchDatabase(newDbType: DatabaseType) {
     try {
       await api.post('/auth/switch-db', { dbType: newDbType });
@@ -85,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ user, dbType, loading, signIn, signOut, switchDatabase }}>
+    <AuthContext.Provider value={{ user, dbType, loading, signIn, signOut, switchDatabase, resetToDbSelection }}>
       {children}
     </AuthContext.Provider>
   );

@@ -13,7 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getMyProfile, updateMyProfile, type UserDTO } from '../api/client';
 
 export default function ProfileScreen() {
-  const { user: authUser } = useAuth();
+  const { user: authUser, signOut, resetToDbSelection, dbType } = useAuth();
   const [user, setUser] = useState<UserDTO | null>(null);
   const [name, setName] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -63,6 +63,32 @@ export default function ProfileScreen() {
       setPhotoUrl(user.photoUrl || '');
     }
     setEditing(false);
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Sair',
+      'Deseja realmente sair?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sair', onPress: signOut, style: 'destructive' }
+      ]
+    );
+  };
+
+  const handleChangeDatabaseType = () => {
+    Alert.alert(
+      'Trocar Banco de Dados',
+      `Você está usando ${dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}. Deseja voltar à seleção de banco?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Trocar Banco', 
+          onPress: resetToDbSelection,
+          style: 'destructive'
+        }
+      ]
+    );
   };
 
   const getRoleName = (role: string) => {
@@ -184,6 +210,31 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           )}
         </View>
+
+        {/* Seção de Configurações */}
+        <View style={styles.section}>
+          <Text style={styles.label}>Banco de Dados Ativo</Text>
+          <Text style={styles.value}>
+            {dbType === 'mongodb' ? '🍃 MongoDB' : '💾 SQLite'}
+          </Text>
+        </View>
+
+        {/* Botões de Ação */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.dbButton]}
+            onPress={handleChangeDatabaseType}
+          >
+            <Text style={styles.actionButtonText}>🔄 Trocar Banco</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.logoutButton]}
+            onPress={handleLogout}
+          >
+            <Text style={styles.actionButtonText}>🚪 Sair</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -276,5 +327,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold'
+  },
+  actionButtons: {
+    marginTop: 20,
+    gap: 12
+  },
+  actionButton: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  dbButton: {
+    backgroundColor: '#FF9500'
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30'
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600'
   }
 });
