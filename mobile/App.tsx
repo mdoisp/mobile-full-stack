@@ -28,13 +28,26 @@ import type { DatabaseType } from './src/services/storage';
 const Stack = createNativeStackNavigator();
 
 function AppContent() {
-  const { user, signOut, loading: authLoading, resetToDbSelection: authResetDb } = useAuth();
+  const { user, signOut, loading: authLoading, resetToDbSelection: authResetDb, switchDatabase } = useAuth();
   const [dbSelected, setDbSelected] = useState(false);
 
   // Handler para reset completo (volta para seleção de banco)
   const handleResetToDbSelection = async () => {
     await authResetDb();
     setDbSelected(false);
+  };
+
+  // Handler quando um banco é selecionado
+  const handleDatabaseSelected = async (dbType: DatabaseType) => {
+    console.log('Database selected in App:', dbType);
+    try {
+      // Atualizar o contexto para refletir o banco selecionado
+      await switchDatabase(dbType);
+      setDbSelected(true);
+    } catch (error) {
+      console.error('Error selecting database:', error);
+      setDbSelected(true); // Continua mesmo se der erro
+    }
   };
 
   if (authLoading) {
@@ -46,7 +59,7 @@ function AppContent() {
   }
 
   if (!dbSelected) {
-    return <DatabaseSelectionScreen onSelectDatabase={() => setDbSelected(true)} />;
+    return <DatabaseSelectionScreen onSelectDatabase={handleDatabaseSelected} />;
   }
 
   if (!user) {

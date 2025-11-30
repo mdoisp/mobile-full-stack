@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../contexts/AuthContext';
 import { DbSelectionContext } from '../../App';
+import { api } from '../api/client';
 
 type RootStackParamList = {
   CategorySelection: undefined;
@@ -24,6 +25,11 @@ export default function CategorySelectionScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { user, dbType } = useAuth();
   const { resetToDbSelection } = React.useContext(DbSelectionContext);
+
+  // Debug: log do dbType
+  React.useEffect(() => {
+    console.log('CategorySelectionScreen - dbType atual:', dbType);
+  }, [dbType]);
 
   const categories = React.useMemo(() => {
     if (user?.role === 'admin') {
@@ -76,12 +82,32 @@ export default function CategorySelectionScreen() {
     }
   }, [navigation]);
 
+  const checkBackendDatabase = async () => {
+    try {
+      const response = await api.get('/auth/current-db');
+      const backendDb = response.data.currentDb;
+      
+      console.log('Frontend dbType:', dbType);
+      console.log('Backend currentDb:', backendDb);
+      
+      Alert.alert(
+        'Verificação de Banco',
+        `Frontend mostrando: ${dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}\n\nBackend usando: ${backendDb === 'mongodb' ? 'MongoDB' : 'SQLite'}\n\n${dbType === backendDb ? '✅ Sincronizados!' : '❌ Dessincronizados!'}`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error checking backend db:', error);
+      Alert.alert('Erro', 'Não foi possível verificar o banco do backend');
+    }
+  };
+
   const handleChangeDatabaseType = () => {
     Alert.alert(
       'Trocar Banco de Dados',
       `Você está usando ${dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}. Deseja voltar à seleção de banco?`,
       [
         { text: 'Cancelar', style: 'cancel' },
+        { text: 'Verificar Banco', onPress: checkBackendDatabase },
         { 
           text: 'Trocar Banco', 
           onPress: resetToDbSelection,

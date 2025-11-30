@@ -96,10 +96,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   async function switchDatabase(newDbType: DatabaseType) {
     try {
-      await api.post('/auth/switch-db', { dbType: newDbType });
+      // Atualiza o storage e o estado local primeiro
       await storage.saveDatabaseType(newDbType);
       setDbType(newDbType);
-      console.log('Database switched to:', newDbType);
+      console.log('Database type updated in context:', newDbType);
+      
+      // Se o usuário estiver autenticado, notifica o backend
+      if (user) {
+        await api.post('/auth/switch-db', { dbType: newDbType });
+        console.log('Backend database switched to:', newDbType);
+      }
     } catch (error: any) {
       console.error('Error switching database:', error);
       throw new Error(error.response?.data?.message || 'Failed to switch database');
