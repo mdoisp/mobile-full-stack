@@ -19,37 +19,72 @@ export const api = axios.create({
   },
 });
 
+// Interfaces
 export interface StudentDTO {
-  _id?: string;
-  studentId: string;
+  id?: string;
   name: string;
-  address: {
-    zipcode: string;
-    street: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-  };
-  courses: string[];
+  enrollment: string;
+  course: string;
+  createdAt?: Date;
 }
 
+export interface GradeDTO {
+  id?: string;
+  studentId: string;
+  subject: string;
+  grade: number;
+  attendance: number;
+  createdAt?: Date;
+}
+
+// Students API
 export async function fetchStudents(): Promise<StudentDTO[]> {
   const { data } = await api.get<StudentDTO[]>('/students');
   return data;
 }
 
-export async function createStudent(payload: StudentDTO): Promise<StudentDTO> {
+export async function getStudentById(id: string): Promise<StudentDTO> {
+  const { data } = await api.get<StudentDTO>(`/students/${id}`);
+  return data;
+}
+
+export async function createStudent(payload: Omit<StudentDTO, 'id' | 'createdAt'>): Promise<StudentDTO> {
   const { data } = await api.post<StudentDTO>('/students', payload);
   return data;
 }
 
-export async function updateStudent(id: string, payload: StudentDTO): Promise<StudentDTO> {
+export async function updateStudent(id: string, payload: Partial<StudentDTO>): Promise<StudentDTO> {
   const { data } = await api.put<StudentDTO>(`/students/${id}`, payload);
   return data;
 }
 
 export async function deleteStudent(id: string): Promise<void> {
   await api.delete(`/students/${id}`);
+}
+
+// Grades API
+export async function fetchGrades(): Promise<GradeDTO[]> {
+  const { data } = await api.get<GradeDTO[]>('/grades');
+  return data;
+}
+
+export async function getGradesByStudentId(studentId: string): Promise<GradeDTO[]> {
+  const { data } = await api.get<GradeDTO[]>(`/grades/student/${studentId}`);
+  return data;
+}
+
+export async function createGrade(payload: Omit<GradeDTO, 'id' | 'createdAt'>): Promise<GradeDTO> {
+  const { data } = await api.post<GradeDTO>('/grades', payload);
+  return data;
+}
+
+export async function updateGrade(id: string, payload: Partial<GradeDTO>): Promise<GradeDTO> {
+  const { data } = await api.put<GradeDTO>(`/grades/${id}`, payload);
+  return data;
+}
+
+export async function deleteGrade(id: string): Promise<void> {
+  await api.delete(`/grades/${id}`);
 }
 
 

@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { fetchStudents, deleteStudent, StudentDTO } from '@/api/client';
+import { fetchStudents, deleteStudent, StudentDTO } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 
 type RootStackParamList = {
   Students: undefined;
@@ -16,16 +17,20 @@ export default function ListScreen({ navigation }: Props) {
   const [students, setStudents] = useState<StudentDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
+
+  const canEdit = user?.role === 'admin' || user?.role === 'secretaria';
+  const canDelete = user?.role === 'admin';
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchStudents();
       setStudents(data);
-    } catch (e) {
-      // Avoid intrusive popup on first load
-      console.warn('Failed to load students');
+    } catch (e: any) {
+      console.warn('Failed to load students:', e.response?.data?.message || e.message);
+      Alert.alert('Erro', 'Falha ao carregar estudantes');
     } finally {
       setLoading(false);
     }
@@ -43,17 +48,22 @@ export default function ListScreen({ navigation }: Props) {
   }, [load]);
 
   const handleDelete = (item: StudentDTO) => {
-    Alert.alert('Confirm', `Delete ${item.name}?`, [
-      { text: 'Cancel', style: 'cancel' },
+    if (!canDelete) {
+      Alert.alert('Acesso Negado', 'Você não tem permissão para deletar estudantes');
+      return;
+    }
+
+    Alert.alert('Confirmar', `Deletar ${item.name}?`, [
+      { text: 'Cancelar', style: 'cancel' },
       {
-        text: 'Delete',
+        text: 'Deletar',
         style: 'destructive',
         onPress: async () => {
           try {
-            await deleteStudent(item._id!);
+            await deleteStudent(item.id!);
             await load();
-          } catch (e) {
-            Alert.alert('Error', 'Unable to delete.');
+          } catch (e: any) {
+            Alert.alert('Erro', e.response?.data?.message || 'Não foi possível deletar');
           }
         },
       },
@@ -64,19 +74,23 @@ export default function ListScreen({ navigation }: Props) {
     <View style={styles.card}>
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.sub}>{item.studentId}</Text>
-        <Text style={styles.sub}>{item.address.city} - {item.address.state}</Text>
+        <Text style={styles.sub}>Matrícula: {item.enrollment}</Text>
+        <Text style={styles.sub}>Curso: {item.course}</Text>
       </View>
       <View style={styles.actions}>
         <TouchableOpacity onPress={() => navigation.navigate('StudentView', { student: item })}>
-          <Text style={styles.link}>View</Text>
+          <Text style={styles.link}>Ver</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('StudentForm', { existing: item })}>
-          <Text style={styles.link}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDelete(item)}>
-          <Text style={[styles.link, { color: '#d00' }]}>Delete</Text>
-        </TouchableOpacity>
+        {canEdit && (
+          <TouchableOpacity onPress={() => navigation.navigate('StudentForm', { existing: item })}>
+            <Text style={styles.link}>Editar</Text>
+          </TouchableOpacity>
+        )}
+        {canDelete && (
+          <TouchableOpacity onPress={() => handleDelete(item)}>
+            <Text style={[styles.link, { color: '#d00' }]}>Deletar</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -84,24 +98,33 @@ export default function ListScreen({ navigation }: Props) {
   if (loading) {
     return (
       <View style={styles.center}> 
-        <ActivityIndicator />
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
       <FlatList
         data={students}
-        keyExtractor={(item) => item._id ?? item.studentId}
+        keyExtractor={(item) => item.id ?? item.enrollment}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16, paddingBottom: 120 + insets.bottom }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 32 }}>No students yet.</Text>}
+        ListEmptyComponent={
+          <Text style={{ textAlign: 'center', marginTop: 32, color: '#666' }}>
+            Nenhum estudante cadastrado
+          </Text>
+        }
       />
-      <TouchableOpacity style={[styles.fab, { bottom: 24 + insets.bottom }]} onPress={() => navigation.navigate('StudentForm')}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      {canEdit && (
+        <TouchableOpacity 
+          style={[styles.fab, { bottom: 24 + insets.bottom }]} 
+          onPress={() => navigation.navigate('StudentForm')}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
