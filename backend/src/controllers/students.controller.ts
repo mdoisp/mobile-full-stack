@@ -5,7 +5,29 @@ import { DatabaseFactory } from '../database/DatabaseFactory.js';
 export const getAllStudents = async (req: AuthRequest, res: Response) => {
   try {
     const db = DatabaseFactory.getDatabase();
-    const students = await db.getAllStudents();
+    const currentUser = req.user!;
+    let students = await db.getAllStudents();
+
+    // Filtrar estudantes baseado no role e disciplina
+    if (currentUser.role === 'professor') {
+      // Professor vê apenas estudantes da sua disciplina
+      const professor = await db.getUserById(currentUser.userId);
+      if (professor?.subject) {
+        students = students.filter(s => s.subject === professor.subject);
+      } else {
+        // Se professor não tem disciplina definida, não vê nenhum estudante
+        students = [];
+      }
+    } else if (currentUser.role === 'estudante') {
+      // Estudante vê apenas ele mesmo
+      // Primeiro precisa encontrar o registro do estudante correspondente ao usuário
+      const allStudents = await db.getAllStudents();
+      const userInfo = await db.getUserById(currentUser.userId);
+      // Filtra pelo nome ou email (assumindo que o email pode ser usado para encontrar)
+      students = allStudents.filter(s => s.name === userInfo?.name);
+    }
+    // Admin e Secretaria veem todos (sem filtro)
+
     res.status(200).json(students);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching students', error: String(error) });
@@ -32,10 +54,10 @@ export const getStudentById = async (req: AuthRequest, res: Response) => {
 
 export const createStudent = async (req: AuthRequest, res: Response) => {
   try {
-    const { name, enrollment, course } = req.body;
+    const { name, enrollment, course, subject } = req.body;
 
     if (!name || !enrollment || !course) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: 'Name, enrollment and course are required' });
     }
 
     const db = DatabaseFactory.getDatabase();
@@ -47,7 +69,7 @@ export const createStudent = async (req: AuthRequest, res: Response) => {
     }
 
     const student = await DatabaseFactory.syncToBoth(db =>
-      db.createStudent({ name, enrollment, course })
+      db.createStudent({ name, enrollment, course, subject })
     );
 
     res.status(201).json(student);
@@ -61,12 +83,12 @@ export const updateStudent = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: 'ID is required' });
     
-    const { name, enrollment, course } = req.body;
+    const { name, enrollment, course, subject } = req.body;
 
     const db = DatabaseFactory.getDatabase();
 
     const updated = await DatabaseFactory.syncToBoth(db =>
-      db.updateStudent(id, { name, enrollment, course })
+      db.updateStudent(id, { name, enrollment, course, subject })
     );
 
     if (!updated) {

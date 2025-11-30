@@ -26,7 +26,7 @@ gradesRouter.post('/', authorize('admin', 'secretaria', 'professor'), createGrad
 // PUT - Admin, Secretaria e Professor podem atualizar
 gradesRouter.put('/:id', authorize('admin', 'secretaria', 'professor'), updateGrade);
 
-// DELETE - Apenas Admin pode deletar
-gradesRouter.delete('/:id', authorize('admin'), deleteGrade);
+// DELETE - Admin e Professor podem deletar
+gradesRouter.delete('/:id', authorize('admin', 'professor'), deleteGrade);
 
 export default gradesRouter;

@@ -7,6 +7,7 @@ const userSchema = new Schema<IUser>({
   password: { type: String, required: true },
   role: { type: String, required: true, enum: ['admin', 'secretaria', 'professor', 'estudante'] },
   name: { type: String, required: true },
+  subject: { type: String, required: false }, // Disciplina (para professores e estudantes)
   photoUrl: { type: String, required: false },
 }, { timestamps: true });
 
@@ -14,6 +15,7 @@ const studentSchema = new Schema<IStudent>({
   name: { type: String, required: true },
   enrollment: { type: String, required: true, unique: true },
   course: { type: String, required: true },
+  subject: { type: String, required: false }, // Disciplina do estudante
 }, { timestamps: true });
 
 const gradeSchema = new Schema<IGrade>({

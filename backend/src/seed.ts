@@ -53,9 +53,21 @@ async function seed() {
         password: professorPassword,
         role: 'professor',
         name: 'João Professor',
+        subject: 'Programação I', // Disciplina do professor
       })
     );
-    console.log('✅ Professor criado');
+    console.log('✅ Professor criado (Disciplina: Programação I)');
+
+    const professor2 = await DatabaseFactory.syncToBoth(db =>
+      db.createUser({
+        email: 'professor2@escola.com',
+        password: professorPassword,
+        role: 'professor',
+        name: 'Maria Professora',
+        subject: 'Banco de Dados', // Disciplina diferente
+      })
+    );
+    console.log('✅ Professor 2 criado (Disciplina: Banco de Dados)');
 
     const estudante = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -75,27 +87,30 @@ async function seed() {
         name: 'Carlos Silva',
         enrollment: '20250001',
         course: 'Ciência da Computação',
+        subject: 'Programação I', // Aluno de Programação I
       })
     );
-    console.log('✅ Estudante 1 criado');
+    console.log('✅ Estudante 1 criado (Programação I)');
 
     const student2 = await DatabaseFactory.syncToBoth(db =>
       db.createStudent({
         name: 'Mariana Santos',
         enrollment: '20250002',
         course: 'Engenharia de Software',
+        subject: 'Programação I', // Aluno de Programação I
       })
     );
-    console.log('✅ Estudante 2 criado');
+    console.log('✅ Estudante 2 criado (Programação I)');
 
     const student3 = await DatabaseFactory.syncToBoth(db =>
       db.createStudent({
         name: 'Pedro Oliveira',
         enrollment: '20250003',
         course: 'Sistemas de Informação',
+        subject: 'Banco de Dados', // Aluno de Banco de Dados
       })
     );
-    console.log('✅ Estudante 3 criado');
+    console.log('✅ Estudante 3 criado (Banco de Dados)');
 
     // Aguardar um pouco para garantir sincronização
     console.log('\n⏳ Aguardando sincronização dos bancos...');
@@ -180,8 +195,12 @@ async function seed() {
     console.log('\n🔐 Credenciais de acesso:');
     console.log('Admin: admin@escola.com / admin123');
     console.log('Secretaria: secretaria@escola.com / secretaria123');
-    console.log('Professor: professor@escola.com / professor123');
+    console.log('Professor (Programação I): professor@escola.com / professor123');
+    console.log('Professor (Banco de Dados): professor2@escola.com / professor123');
     console.log('Estudante: estudante@escola.com / estudante123');
+    console.log('\n📚 Disciplinas criadas:');
+    console.log('- Programação I: 2 alunos (Carlos, Mariana)');
+    console.log('- Banco de Dados: 1 aluno (Pedro)');
 
   } catch (error) {
     console.error('❌ Erro durante o seed:', error);

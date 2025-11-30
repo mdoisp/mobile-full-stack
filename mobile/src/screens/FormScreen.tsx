@@ -19,6 +19,7 @@ export default function FormScreen({ navigation, route }: Props) {
       name: '',
       enrollment: '',
       course: '',
+      subject: '',
     }
   );
 
@@ -32,6 +33,7 @@ export default function FormScreen({ navigation, route }: Props) {
         name: form.name.trim(),
         enrollment: form.enrollment.trim(),
         course: form.course.trim(),
+        subject: form.subject?.trim() || undefined,
       };
 
       if (editing && form.id) {
@@ -80,6 +82,14 @@ export default function FormScreen({ navigation, route }: Props) {
         value={form.course} 
         onChangeText={(t) => setForm(prev => ({ ...prev, course: t }))} 
         placeholder="Ex.: Ciência da Computação" 
+      />
+
+      <Text style={styles.label}>Disciplina (opcional)</Text>
+      <TextInput 
+        style={styles.input} 
+        value={form.subject || ''} 
+        onChangeText={(t) => setForm(prev => ({ ...prev, subject: t }))} 
+        placeholder="Ex.: Programação I, Banco de Dados" 
       />
 
       <TouchableOpacity 

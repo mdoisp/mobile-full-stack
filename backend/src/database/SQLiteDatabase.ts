@@ -29,6 +29,7 @@ export class SQLiteDatabase implements IDatabase {
         password TEXT NOT NULL,
         role TEXT NOT NULL CHECK(role IN ('admin', 'secretaria', 'professor', 'estudante')),
         name TEXT NOT NULL,
+        subject TEXT,
         photoUrl TEXT,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
@@ -38,6 +39,7 @@ export class SQLiteDatabase implements IDatabase {
         name TEXT NOT NULL,
         enrollment TEXT UNIQUE NOT NULL,
         course TEXT NOT NULL,
+        subject TEXT,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -63,9 +65,9 @@ export class SQLiteDatabase implements IDatabase {
     
     const id = this.generateId();
     const stmt = this.db.prepare(
-      'INSERT INTO users (id, email, password, role, name, photoUrl) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO users (id, email, password, role, name, subject, photoUrl) VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
-    stmt.run(id, user.email, user.password, user.role, user.name, user.photoUrl || null);
+    stmt.run(id, user.email, user.password, user.role, user.name, user.subject || null, user.photoUrl || null);
     
     return { id, ...user, createdAt: new Date() };
   }
@@ -123,9 +125,9 @@ export class SQLiteDatabase implements IDatabase {
     
     const id = this.generateId();
     const stmt = this.db.prepare(
-      'INSERT INTO students (id, name, enrollment, course) VALUES (?, ?, ?, ?)'
+      'INSERT INTO students (id, name, enrollment, course, subject) VALUES (?, ?, ?, ?, ?)'
     );
-    stmt.run(id, student.name, student.enrollment, student.course);
+    stmt.run(id, student.name, student.enrollment, student.course, student.subject || null);
     
     return { id, ...student, createdAt: new Date() };
   }

@@ -8,6 +8,7 @@ import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import DatabaseSelectionScreen from './src/screens/DatabaseSelectionScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import CategorySelectionScreen from './src/screens/CategorySelectionScreen';
 import ListScreen from './src/screens/ListScreen';
 import FormScreen from './src/screens/FormScreen';
 import ViewScreen from './src/screens/ViewScreen';
@@ -42,9 +43,35 @@ function AppContent() {
     return <LoginScreen />;
   }
 
+  // Define a tela inicial baseada no role
+  const getInitialRouteName = () => {
+    if (user.role === 'admin' || user.role === 'secretaria') {
+      return 'CategorySelection';
+    }
+    return 'Students';
+  };
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={getInitialRouteName()}>
+        <Stack.Screen 
+          name="CategorySelection" 
+          component={CategorySelectionScreen} 
+          options={({ navigation }) => ({
+            title: 'Categorias',
+            headerLeft: () => null, // Remove botão de voltar
+            headerRight: () => (
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                  <Text style={{ color: '#007AFF', fontWeight: '600' }}>Perfil</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={signOut}>
+                  <Text style={{ color: '#FF3B30', fontWeight: '600' }}>Sair</Text>
+                </TouchableOpacity>
+              </View>
+            ),
+          })}
+        />
         <Stack.Screen 
           name="Students" 
           component={ListScreen} 
@@ -54,12 +81,6 @@ function AppContent() {
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
                   <Text style={{ color: '#007AFF', fontWeight: '600' }}>Perfil</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('UsersList')}>
-                  <Text style={{ color: '#007AFF', fontWeight: '600' }}>Usuários</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('StudentForm')}>
-                  <Text style={{ color: '#007AFF', fontWeight: '600' }}>+ Aluno</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={signOut}>
                   <Text style={{ color: '#FF3B30', fontWeight: '600' }}>Sair</Text>
@@ -86,7 +107,17 @@ function AppContent() {
         <Stack.Screen 
           name="UsersList" 
           component={UsersListScreen} 
-          options={{ title: 'Usuários' }} 
+          options={({ route }) => {
+            const params = route.params as { category?: string };
+            const titles: Record<string, string> = {
+              secretaria: 'Secretaria',
+              professor: 'Professores',
+              estudante: 'Estudantes'
+            };
+            return {
+              title: params?.category ? titles[params.category] : 'Usuários'
+            };
+          }} 
         />
         <Stack.Screen 
           name="UserView" 

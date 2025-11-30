@@ -37,6 +37,9 @@ export default function ViewScreen({ route }: Props) {
         <Text style={styles.title}>{student.name}</Text>
         <Text style={styles.item}>Matrícula: {student.enrollment}</Text>
         <Text style={styles.item}>Curso: {student.course}</Text>
+        {student.subject && (
+          <Text style={styles.item}>Disciplina: {student.subject}</Text>
+        )}
       </View>
 
       <View style={styles.section}>

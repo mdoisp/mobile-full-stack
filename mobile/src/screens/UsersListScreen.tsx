@@ -11,32 +11,45 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllUsers, type UserDTO } from '../api/client';
 
 type RootStackParamList = {
-  UsersList: undefined;
+  UsersList: { category?: 'secretaria' | 'professor' | 'estudante' };
   UserView: { userId: string };
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type UsersListRouteProp = RouteProp<RootStackParamList, 'UsersList'>;
 
-export default function UsersListScreen() {
+type Props = {
+  route: UsersListRouteProp;
+};
+
+export default function UsersListScreen({ route }: Props) {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useAuth();
+  const { category } = route.params || {};
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [category]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       const data = await getAllUsers();
-      setUsers(data);
+      
+      // Filtrar por categoria se especificado
+      const filteredData = category 
+        ? data.filter(u => u.role === category)
+        : data;
+      
+      setUsers(filteredData);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar os usuários');
       console.error(error);

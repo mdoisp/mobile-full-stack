@@ -25,6 +25,7 @@ export interface StudentDTO {
   name: string;
   enrollment: string;
   course: string;
+  subject?: string; // Disciplina do estudante
   createdAt?: Date;
 }
 
@@ -42,6 +43,7 @@ export interface UserDTO {
   name: string;
   email: string;
   role: 'admin' | 'secretaria' | 'professor' | 'estudante';
+  subject?: string; // Disciplina (para professores e estudantes)
   photoUrl?: string;
   createdAt?: Date;
 }

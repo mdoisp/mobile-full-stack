@@ -76,6 +76,11 @@ export default function ListScreen({ navigation }: Props) {
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.sub}>Matrícula: {item.enrollment}</Text>
         <Text style={styles.sub}>Curso: {item.course}</Text>
+        {item.subject && (
+          <Text style={[styles.sub, { fontWeight: '600', color: '#007AFF' }]}>
+            📚 {item.subject}
+          </Text>
+        )}
       </View>
       <View style={styles.actions}>
         <TouchableOpacity onPress={() => navigation.navigate('StudentView', { student: item })}>

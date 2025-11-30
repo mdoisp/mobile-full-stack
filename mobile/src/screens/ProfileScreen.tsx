@@ -133,6 +133,13 @@ export default function ProfileScreen() {
           <Text style={styles.value}>{getRoleName(user.role)}</Text>
         </View>
 
+        {user.subject && (
+          <View style={styles.section}>
+            <Text style={styles.label}>Disciplina:</Text>
+            <Text style={styles.value}>{user.subject}</Text>
+          </View>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.label}>URL da Foto:</Text>
           {editing ? (

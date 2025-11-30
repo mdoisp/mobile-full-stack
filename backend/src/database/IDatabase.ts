@@ -5,16 +5,18 @@ export interface IUser {
   password: string;
   role: 'admin' | 'secretaria' | 'professor' | 'estudante';
   name: string;
+  subject?: string; // Disciplina (para professores e estudantes)
   photoUrl?: string;
   createdAt?: Date;
 }
 
 export interface IStudent {
-  id?: string;
+  id: string;
   name: string;
   enrollment: string;
   course: string;
-  createdAt?: Date;
+  subject?: string; // Disciplina do estudante
+  createdAt: Date;
 }
 
 export interface IGrade {
