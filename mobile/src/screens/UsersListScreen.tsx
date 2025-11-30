@@ -24,13 +24,13 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type UsersListRouteProp = RouteProp<RootStackParamList, 'UsersList'>;
 
 type Props = {
-  route: UsersListRouteProp;
+  route?: UsersListRouteProp;
 };
 
 export default function UsersListScreen({ route }: Props) {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useAuth();
-  const { category } = route.params || {};
+  const category = route?.params?.category;
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);

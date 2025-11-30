@@ -110,6 +110,13 @@ export default function UserViewScreen({ route }: Props) {
             <Text style={styles.roleText}>{getRoleName(user.role)}</Text>
           </View>
         </View>
+
+        {user.subject && (
+          <View style={styles.section}>
+            <Text style={styles.label}>Disciplina:</Text>
+            <Text style={styles.value}>{user.subject}</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

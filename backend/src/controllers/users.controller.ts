@@ -125,9 +125,26 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Verificar permissões
-    if (currentUserRole !== 'admin' && id !== currentUserId) {
-      return res.status(403).json({ message: 'Access denied' });
+    // Verificar permissões de edição
+    // Admin pode editar todos
+    // Secretaria pode editar: ela mesma, professores e estudantes (não pode editar admin)
+    // Professor e Estudante só podem editar eles mesmos
+    if (currentUserRole === 'admin') {
+      // Admin pode editar qualquer um
+    } else if (currentUserRole === 'secretaria') {
+      // Secretaria não pode editar admin
+      if (targetUser.role === 'admin' && id !== currentUserId) {
+        return res.status(403).json({ message: 'Secretaria cannot edit admin users' });
+      }
+      // Pode editar: ela mesma, professores e estudantes
+      if (id !== currentUserId && targetUser.role !== 'professor' && targetUser.role !== 'estudante') {
+        return res.status(403).json({ message: 'Access denied' });
+      }
+    } else {
+      // Professor e Estudante só podem editar eles mesmos
+      if (id !== currentUserId) {
+        return res.status(403).json({ message: 'You can only edit your own profile' });
+      }
     }
 
     // Apenas admin pode alterar email
