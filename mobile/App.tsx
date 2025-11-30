@@ -15,6 +15,8 @@ import ViewScreen from './src/screens/ViewScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import UsersListScreen from './src/screens/UsersListScreen';
 import UserViewScreen from './src/screens/UserViewScreen';
+import UserEditScreen from './src/screens/UserEditScreen';
+import GradeFormScreen from './src/screens/GradeFormScreen';
 import * as storage from './src/services/storage';
 import type { DatabaseType } from './src/services/storage';
 
@@ -108,21 +110,37 @@ function AppContent() {
           name="UsersList" 
           component={UsersListScreen} 
           options={({ route }) => {
-            const params = route.params as { category?: string };
-            const titles: Record<string, string> = {
-              secretaria: 'Secretaria',
-              professor: 'Professores',
-              estudante: 'Estudantes'
-            };
-            return {
-              title: params?.category ? titles[params.category] : 'Usuários'
-            };
+            try {
+              const params = route.params as { category?: string } | undefined;
+              const titles: Record<string, string> = {
+                secretaria: 'Secretaria',
+                professor: 'Professores',
+                estudante: 'Estudantes'
+              };
+              const category = params?.category;
+              return {
+                title: category && titles[category] ? titles[category] : 'Usuários'
+              };
+            } catch (error) {
+              console.error('Error in UsersList options:', error);
+              return { title: 'Usuários' };
+            }
           }} 
         />
         <Stack.Screen 
           name="UserView" 
           component={UserViewScreen} 
           options={{ title: 'Perfil do Usuário' }} 
+        />
+        <Stack.Screen 
+          name="UserEdit" 
+          component={UserEditScreen} 
+          options={{ title: 'Editar Usuário' }} 
+        />
+        <Stack.Screen 
+          name="GradeForm" 
+          component={GradeFormScreen} 
+          options={{ title: 'Nota e Frequência' }} 
         />
       </Stack.Navigator>
       <StatusBar style="auto" />

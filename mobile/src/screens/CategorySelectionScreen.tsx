@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView
+  SafeAreaView,
+  Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -38,15 +39,40 @@ export default function CategorySelectionScreen() {
     return [];
   }, [user?.role]);
 
-  const handleCategoryPress = (category: string) => {
-    if (category === 'estudante') {
-      navigation.navigate('Students');
-    } else {
-      navigation.navigate('UsersList', { 
-        category: category as 'secretaria' | 'professor' | 'estudante' 
-      });
+  const handleCategoryPress = useCallback((category: string) => {
+    try {
+      console.log('=== CATEGORY PRESS START ===');
+      console.log('Category selected:', category);
+      console.log('Category type:', typeof category);
+      console.log('Navigation object exists:', !!navigation);
+      
+      if (category === 'estudante') {
+        console.log('Navigating to Students screen');
+        navigation.navigate('Students');
+      } else {
+        const validCategory = category as 'secretaria' | 'professor' | 'estudante';
+        console.log('Navigating to UsersList with category:', validCategory);
+        console.log('Params object:', { category: validCategory });
+        
+        // Usar navigate com params explícitos e verificação
+        if (navigation && typeof navigation.navigate === 'function') {
+          navigation.navigate('UsersList', { 
+            category: validCategory
+          });
+          console.log('Navigation successful');
+        } else {
+          throw new Error('Navigation object invalid');
+        }
+      }
+      console.log('=== CATEGORY PRESS END ===');
+    } catch (error: any) {
+      console.error('=== NAVIGATION ERROR ===');
+      console.error('Error:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error stack:', error?.stack);
+      Alert.alert('Erro', `Não foi possível navegar: ${error?.message || 'Erro desconhecido'}`);
     }
-  };
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>

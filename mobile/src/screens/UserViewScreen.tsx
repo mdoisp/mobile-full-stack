@@ -6,16 +6,22 @@ import {
   Image,
   ScrollView,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableOpacity
 } from 'react-native';
 import type { RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import { getUserById, type UserDTO } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 
 type RootStackParamList = {
   UserView: { userId: string };
+  UserEdit: { userId: string };
 };
 
 type UserViewRouteProp = RouteProp<RootStackParamList, 'UserView'>;
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type Props = {
   route: UserViewRouteProp;
@@ -23,8 +29,14 @@ type Props = {
 
 export default function UserViewScreen({ route }: Props) {
   const { userId } = route.params;
+  const navigation = useNavigation<NavigationProp>();
+  const { user: currentUser } = useAuth();
   const [user, setUser] = useState<UserDTO | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Admin pode editar todos, Secretaria pode editar professores e estudantes
+  const canEdit = currentUser?.role === 'admin' || 
+    (currentUser?.role === 'secretaria' && user?.role !== 'admin');
 
   useEffect(() => {
     loadUser();
@@ -117,6 +129,15 @@ export default function UserViewScreen({ route }: Props) {
             <Text style={styles.value}>{user.subject}</Text>
           </View>
         )}
+
+        {canEdit && (
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => navigation.navigate('UserEdit', { userId: user.id })}
+          >
+            <Text style={styles.editButtonText}>✏️ Editar Perfil</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );
@@ -188,5 +209,17 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: '#666'
+  },
+  editButton: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20
+  },
+  editButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold'
   }
 });

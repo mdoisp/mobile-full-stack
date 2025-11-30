@@ -34,25 +34,41 @@ export default function UsersListScreen({ route }: Props) {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('UsersListScreen mounted with category:', category);
+    console.log('Route params:', route?.params);
+    setError(null);
     loadUsers();
   }, [category]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+      
       const data = await getAllUsers();
+      
+      console.log('Total users loaded:', data.length);
+      console.log('Filtering by category:', category);
       
       // Filtrar por categoria se especificado
       const filteredData = category 
         ? data.filter(u => u.role === category)
         : data;
       
+      console.log('Filtered users:', filteredData.length);
       setUsers(filteredData);
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível carregar os usuários');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Error loading users:', error);
+      const errorMessage = error.message || 'Não foi possível carregar os usuários';
+      setError(errorMessage);
+      Alert.alert('Erro', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -116,6 +132,14 @@ export default function UsersListScreen({ route }: Props) {
   const getEmptyMessage = () => {
     if (user?.role === 'estudante') {
       return 'Apenas seu perfil está disponível';
+    }
+    if (category) {
+      const categoryNames: Record<string, string> = {
+        secretaria: 'secretarias',
+        professor: 'professores',
+        estudante: 'estudantes'
+      };
+      return `Nenhum ${categoryNames[category]} encontrado`;
     }
     return 'Nenhum usuário encontrado';
   };
