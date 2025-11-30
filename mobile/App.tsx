@@ -9,6 +9,11 @@ import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import DatabaseSelectionScreen from './src/screens/DatabaseSelectionScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import CategorySelectionScreen from './src/screens/CategorySelectionScreen';
+
+// Contexto para controlar o estado do dbSelected
+export const DbSelectionContext = React.createContext<{
+  resetToDbSelection: () => void;
+}>({ resetToDbSelection: () => {} });
 import ListScreen from './src/screens/ListScreen';
 import FormScreen from './src/screens/FormScreen';
 import ViewScreen from './src/screens/ViewScreen';
@@ -23,11 +28,14 @@ import type { DatabaseType } from './src/services/storage';
 const Stack = createNativeStackNavigator();
 
 function AppContent() {
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, signOut, loading: authLoading, resetToDbSelection: authResetDb } = useAuth();
   const [dbSelected, setDbSelected] = useState(false);
 
-  // Sempre mostra a tela de seleção de banco ao iniciar
-  // (removida a verificação de banco armazenado)
+  // Handler para reset completo (volta para seleção de banco)
+  const handleResetToDbSelection = async () => {
+    await authResetDb();
+    setDbSelected(false);
+  };
 
   if (authLoading) {
     return (
@@ -54,8 +62,9 @@ function AppContent() {
   };
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={getInitialRouteName()}>
+    <DbSelectionContext.Provider value={{ resetToDbSelection: handleResetToDbSelection }}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName={getInitialRouteName()}>
         <Stack.Screen 
           name="CategorySelection" 
           component={CategorySelectionScreen} 
@@ -143,8 +152,9 @@ function AppContent() {
           options={{ title: 'Nota e Frequência' }} 
         />
       </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </DbSelectionContext.Provider>
   );
 }
 

@@ -211,30 +211,17 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Seção de Configurações */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Banco de Dados Ativo</Text>
-          <Text style={styles.value}>
-            {dbType === 'mongodb' ? '🍃 MongoDB' : '💾 SQLite'}
-          </Text>
-        </View>
-
-        {/* Botões de Ação */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.dbButton]}
-            onPress={handleChangeDatabaseType}
-          >
-            <Text style={styles.actionButtonText}>🔄 Trocar Banco</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.actionButton, styles.logoutButton]}
-            onPress={handleLogout}
-          >
-            <Text style={styles.actionButtonText}>🚪 Sair</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Botões de Ação - Apenas para não-admin */}
+        {authUser?.role !== 'admin' && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.logoutButton]}
+              onPress={handleLogout}
+            >
+              <Text style={styles.actionButtonText}>🚪 Sair</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

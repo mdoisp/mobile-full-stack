@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../contexts/AuthContext';
+import { DbSelectionContext } from '../../App';
 
 type RootStackParamList = {
   CategorySelection: undefined;
@@ -21,7 +22,8 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CategorySelectionScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { user } = useAuth();
+  const { user, dbType } = useAuth();
+  const { resetToDbSelection } = React.useContext(DbSelectionContext);
 
   const categories = React.useMemo(() => {
     if (user?.role === 'admin') {
@@ -74,6 +76,21 @@ export default function CategorySelectionScreen() {
     }
   }, [navigation]);
 
+  const handleChangeDatabaseType = () => {
+    Alert.alert(
+      'Trocar Banco de Dados',
+      `Você está usando ${dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}. Deseja voltar à seleção de banco?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Trocar Banco', 
+          onPress: resetToDbSelection,
+          style: 'destructive'
+        }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -96,6 +113,21 @@ export default function CategorySelectionScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        {user?.role === 'admin' && (
+          <View style={styles.dbSection}>
+            <Text style={styles.dbLabel}>Banco de Dados Ativo</Text>
+            <Text style={styles.dbValue}>
+              {dbType === 'mongodb' ? '🍃 MongoDB' : '💾 SQLite'}
+            </Text>
+            <TouchableOpacity
+              style={styles.dbButton}
+              onPress={handleChangeDatabaseType}
+            >
+              <Text style={styles.dbButtonText}>🔄 Trocar Banco de Dados</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -148,5 +180,37 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     flex: 1
+  },
+  dbSection: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    alignItems: 'center'
+  },
+  dbLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+    fontWeight: '600'
+  },
+  dbValue: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 15,
+    fontWeight: '600'
+  },
+  dbButton: {
+    backgroundColor: '#FF9500',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center'
+  },
+  dbButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600'
   }
 });
