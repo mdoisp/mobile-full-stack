@@ -12,11 +12,34 @@ export class SQLiteDatabase implements IDatabase {
   async connect(): Promise<void> {
     this.db = new Database(this.dbPath);
     this.initializeTables();
+    this.runMigrations();
     console.log('SQLite connected');
   }
 
   async disconnect(): Promise<void> {
     this.db?.close();
+  }
+
+  private runMigrations(): void {
+    if (!this.db) throw new Error('Database not connected');
+
+    try {
+      // Verificar se a coluna status existe na tabela students
+      const tableInfo = this.db.pragma('table_info(students)') as any[];
+      const hasStatusColumn = tableInfo.some((col: any) => col.name === 'status');
+      
+      if (!hasStatusColumn) {
+        console.log('Running migration: Adding status column to students table...');
+        this.db.exec(`
+          ALTER TABLE students 
+          ADD COLUMN status TEXT DEFAULT 'ativo' 
+          CHECK(status IN ('ativo', 'trancado', 'transferido', 'concluido'));
+        `);
+        console.log('✓ Migration completed: status column added');
+      }
+    } catch (error) {
+      console.error('Migration error:', error);
+    }
   }
 
   private initializeTables(): void {
