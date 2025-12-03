@@ -78,7 +78,7 @@ export default function ListScreen({ navigation }: Props) {
         <Text style={styles.sub}>Curso: {item.course}</Text>
         {item.subject && (
           <Text style={[styles.sub, { fontWeight: '600', color: '#007AFF' }]}>
-            📚 {item.subject}
+            {item.subject}
           </Text>
         )}
       </View>

@@ -135,7 +135,7 @@ export default function UserViewScreen({ route }: Props) {
             style={styles.editButton}
             onPress={() => navigation.navigate('UserEdit', { userId: user.id })}
           >
-            <Text style={styles.editButtonText}>✏️ Editar Perfil</Text>
+            <Text style={styles.editButtonText}>Editar Perfil</Text>
           </TouchableOpacity>
         )}
       </View>

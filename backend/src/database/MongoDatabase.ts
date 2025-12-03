@@ -38,7 +38,7 @@ export class MongoDatabase implements IDatabase {
 
   async connect(): Promise<void> {
     await mongoose.connect(this.connectionString);
-    console.log('✅ MongoDB connected');
+    console.log('MongoDB connected');
   }
 
   async disconnect(): Promise<void> {

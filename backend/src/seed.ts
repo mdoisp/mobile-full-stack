@@ -12,7 +12,7 @@ if (!MONGO_URL) {
 }
 
 async function seed() {
-  console.log('🌱 Iniciando seed do banco de dados...');
+  console.log('Iniciando seed do banco de dados...');
 
   await DatabaseFactory.initialize('mongodb', MONGO_URL!, './database.sqlite');
   const db = DatabaseFactory.getDatabase();
@@ -25,7 +25,7 @@ async function seed() {
     const estudantePassword = await AuthService.hashPassword('estudante123');
 
     // Cria usuários administrativos em ambos os bancos
-    console.log('📝 Criando usuários administrativos...');
+    console.log('Criando usuários administrativos...');
     
     const admin = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -35,7 +35,7 @@ async function seed() {
         name: 'Administrador',
       })
     );
-    console.log('✅ Admin criado');
+    console.log('Admin criado');
 
     const secretaria = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -45,7 +45,7 @@ async function seed() {
         name: 'Maria Secretária',
       })
     );
-    console.log('✅ Secretaria criada');
+    console.log('Secretaria criada');
 
     const professor = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -56,7 +56,7 @@ async function seed() {
         subject: 'Programação I', // Disciplina do professor
       })
     );
-    console.log('✅ Professor criado (Disciplina: Programação I)');
+    console.log('Professor criado (Disciplina: Programação I)');
 
     const professor2 = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -67,10 +67,10 @@ async function seed() {
         subject: 'Banco de Dados', // Disciplina diferente
       })
     );
-    console.log('✅ Professor 2 criado (Disciplina: Banco de Dados)');
+    console.log('Professor 2 criado (Disciplina: Banco de Dados)');
 
     // Criar estudantes com seus respectivos usuários de login
-    console.log('\n📚 Criando estudantes...');
+    console.log('\nCriando estudantes...');
     
     // Estudante 1: Carlos Silva
     const student1 = await DatabaseFactory.syncToBoth(db =>
@@ -81,7 +81,7 @@ async function seed() {
         subject: 'Programação I',
       })
     );
-    console.log('✅ Estudante 1 criado (Carlos Silva - Programação I)');
+    console.log('Estudante 1 criado (Carlos Silva - Programação I)');
 
     const userStudent1 = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -92,7 +92,7 @@ async function seed() {
         subject: 'Programação I',
       })
     );
-    console.log('✅ Login criado para Carlos Silva');
+    console.log('Login criado para Carlos Silva');
 
     // Estudante 2: Mariana Santos
     const student2 = await DatabaseFactory.syncToBoth(db =>
@@ -103,7 +103,7 @@ async function seed() {
         subject: 'Programação I',
       })
     );
-    console.log('✅ Estudante 2 criado (Mariana Santos - Programação I)');
+    console.log('Estudante 2 criado (Mariana Santos - Programação I)');
 
     const userStudent2 = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -114,7 +114,7 @@ async function seed() {
         subject: 'Programação I',
       })
     );
-    console.log('✅ Login criado para Mariana Santos');
+    console.log('Login criado para Mariana Santos');
 
     // Estudante 3: Pedro Oliveira
     const student3 = await DatabaseFactory.syncToBoth(db =>
@@ -125,7 +125,7 @@ async function seed() {
         subject: 'Banco de Dados',
       })
     );
-    console.log('✅ Estudante 3 criado (Pedro Oliveira - Banco de Dados)');
+    console.log('Estudante 3 criado (Pedro Oliveira - Banco de Dados)');
 
     const userStudent3 = await DatabaseFactory.syncToBoth(db =>
       db.createUser({
@@ -136,14 +136,14 @@ async function seed() {
         subject: 'Banco de Dados',
       })
     );
-    console.log('✅ Login criado para Pedro Oliveira');
+    console.log('Login criado para Pedro Oliveira');
 
     // Aguardar um pouco para garantir sincronização
-    console.log('\n⏳ Aguardando sincronização dos bancos...');
+    console.log('\nAguardando sincronização dos bancos...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Buscar estudantes de ambos os bancos para pegar os IDs corretos
-    console.log('\n📊 Criando notas...');
+    console.log('\nCriando notas...');
     
     // Trocar para SQLite e buscar estudantes lá
     await DatabaseFactory.switchDatabase('sqlite');
@@ -215,26 +215,26 @@ async function seed() {
       attendance: 88,
     });
 
-    console.log('✅ Notas criadas em ambos os bancos');
+    console.log('Notas criadas em ambos os bancos');
 
-    console.log('\n✨ Seed concluído com sucesso!');
-    console.log('\n🔐 Credenciais de acesso:');
-    console.log('\n👤 Administração:');
+    console.log('\nSeed concluído com sucesso!');
+    console.log('\nCredenciais de acesso:');
+    console.log('\nAdministração:');
     console.log('  Admin: admin@escola.com / admin123');
     console.log('  Secretaria: secretaria@escola.com / secretaria123');
-    console.log('\n👨‍🏫 Professores:');
+    console.log('\nProfessores:');
     console.log('  João Professor (Programação I): professor@escola.com / professor123');
     console.log('  Maria Professora (Banco de Dados): professor2@escola.com / professor123');
-    console.log('\n🎓 Estudantes:');
+    console.log('\nEstudantes:');
     console.log('  Carlos Silva (Programação I): carlos.silva@estudante.com / estudante123');
     console.log('  Mariana Santos (Programação I): mariana.santos@estudante.com / estudante123');
     console.log('  Pedro Oliveira (Banco de Dados): pedro.oliveira@estudante.com / estudante123');
-    console.log('\n📚 Disciplinas:');
+    console.log('\nDisciplinas:');
     console.log('  - Programação I: 2 alunos (Carlos, Mariana)');
     console.log('  - Banco de Dados: 1 aluno (Pedro)');
 
   } catch (error) {
-    console.error('❌ Erro durante o seed:', error);
+    console.error('Erro durante o seed:', error);
   } finally {
     await DatabaseFactory.disconnect();
     process.exit(0);

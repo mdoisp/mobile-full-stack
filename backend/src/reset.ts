@@ -12,13 +12,13 @@ if (!MONGO_URL) {
 }
 
 async function reset() {
-  console.log('🗑️  Limpando bancos de dados...');
+  console.log('Limpando bancos de dados...');
 
   await DatabaseFactory.initialize('mongodb', MONGO_URL!, './database.sqlite');
 
   try {
     // Limpar MongoDB
-    console.log('🔄 Limpando MongoDB...');
+    console.log('Limpando MongoDB...');
     const dbMongo = DatabaseFactory.getDatabase();
     
     const allGrades = await dbMongo.getAllGrades();
@@ -36,25 +36,25 @@ async function reset() {
       if (user.id) await dbMongo.deleteUser(user.id);
     }
     
-    console.log('✅ MongoDB limpo');
+    console.log('MongoDB limpo');
 
     // Limpar SQLite - deletando o arquivo
-    console.log('🔄 Limpando SQLite...');
+    console.log('Limpando SQLite...');
     await DatabaseFactory.disconnect();
     
     const sqlitePath = './database.sqlite';
     if (fs.existsSync(sqlitePath)) {
       fs.unlinkSync(sqlitePath);
-      console.log('✅ SQLite limpo');
+      console.log('SQLite limpo');
     } else {
       console.log('ℹ️  SQLite já estava vazio');
     }
 
-    console.log('\n✨ Bancos de dados resetados com sucesso!');
-    console.log('💡 Agora você pode rodar: npm run seed');
+    console.log('\nBancos de dados resetados com sucesso!');
+    console.log('Agora você pode rodar: npm run seed');
 
   } catch (error) {
-    console.error('❌ Erro durante o reset:', error);
+    console.error('Erro durante o reset:', error);
   } finally {
     process.exit(0);
   }

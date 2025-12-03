@@ -83,7 +83,7 @@ export default function ViewScreen({ route, navigation }: Props) {
                 <Text style={styles.gradeSub}>Frequência: {grade.attendance.toFixed(0)}%</Text>
               </View>
               {canEditGrades && (
-                <Text style={styles.editIcon}>✏️</Text>
+                <Text style={styles.editIcon}>Editar</Text>
               )}
             </TouchableOpacity>
           ))

@@ -28,7 +28,7 @@ export class DatabaseFactory {
     await this.primaryDb.connect();
     await this.secondaryDb.connect();
     
-    console.log(`🎯 Primary database: ${dbType.toUpperCase()}`);
+    console.log(`Primary database: ${dbType.toUpperCase()}`);
   }
 
   static getDatabase(): IDatabase {
@@ -50,7 +50,7 @@ export class DatabaseFactory {
 
     // Sincroniza com a base secundária (sem bloquear)
     operation(this.secondaryDb).catch(err => {
-      console.error('⚠️ Secondary database sync failed:', err);
+      console.error('Secondary database sync failed:', err);
     });
 
     return result;
@@ -65,7 +65,7 @@ export class DatabaseFactory {
     this.secondaryDb = temp;
     this.currentDbType = newDbType;
 
-    console.log(`🔄 Switched to ${newDbType.toUpperCase()}`);
+    console.log(`Switched to ${newDbType.toUpperCase()}`);
   }
 
   static getCurrentDbType(): DatabaseType {

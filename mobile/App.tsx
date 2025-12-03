@@ -22,6 +22,7 @@ import UsersListScreen from './src/screens/UsersListScreen';
 import UserViewScreen from './src/screens/UserViewScreen';
 import UserEditScreen from './src/screens/UserEditScreen';
 import GradeFormScreen from './src/screens/GradeFormScreen';
+import UserRegisterScreen from './src/screens/UserRegisterScreen';
 import * as storage from './src/services/storage';
 import type { DatabaseType } from './src/services/storage';
 
@@ -83,14 +84,30 @@ function AppContent() {
           component={CategorySelectionScreen} 
           options={({ navigation }) => ({
             title: 'Categorias',
-            headerLeft: () => null, // Remove botão de voltar
+            headerLeft: () => null,
             headerRight: () => (
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                  <Text style={{ color: '#007AFF', fontWeight: '600' }}>Perfil</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('Profile')}
+                  style={{
+                    backgroundColor: '#007AFF',
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 6
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Perfil</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={signOut}>
-                  <Text style={{ color: '#FF3B30', fontWeight: '600' }}>Sair</Text>
+                <TouchableOpacity 
+                  onPress={signOut}
+                  style={{
+                    backgroundColor: '#FF3B30',
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 6
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Sair</Text>
                 </TouchableOpacity>
               </View>
             ),
@@ -102,12 +119,28 @@ function AppContent() {
           options={({ navigation }) => ({
             title: 'Estudantes',
             headerRight: () => (
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                  <Text style={{ color: '#007AFF', fontWeight: '600' }}>Perfil</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('Profile')}
+                  style={{
+                    backgroundColor: '#007AFF',
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 6
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Perfil</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={signOut}>
-                  <Text style={{ color: '#FF3B30', fontWeight: '600' }}>Sair</Text>
+                <TouchableOpacity 
+                  onPress={signOut}
+                  style={{
+                    backgroundColor: '#FF3B30',
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 6
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>Sair</Text>
                 </TouchableOpacity>
               </View>
             ),
@@ -163,6 +196,11 @@ function AppContent() {
           name="GradeForm" 
           component={GradeFormScreen} 
           options={{ title: 'Nota e Frequência' }} 
+        />
+        <Stack.Screen 
+          name="UserRegister" 
+          component={UserRegisterScreen} 
+          options={{ title: 'Criar Nova Conta' }} 
         />
       </Stack.Navigator>
         <StatusBar style="auto" />

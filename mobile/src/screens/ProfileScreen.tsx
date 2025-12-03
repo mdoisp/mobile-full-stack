@@ -218,7 +218,7 @@ export default function ProfileScreen() {
               style={[styles.actionButton, styles.logoutButton]}
               onPress={handleLogout}
             >
-              <Text style={styles.actionButtonText}>🚪 Sair</Text>
+              <Text style={styles.actionButtonText}>Sair</Text>
             </TouchableOpacity>
           </View>
         )}

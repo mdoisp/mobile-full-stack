@@ -12,7 +12,7 @@ export class SQLiteDatabase implements IDatabase {
   async connect(): Promise<void> {
     this.db = new Database(this.dbPath);
     this.initializeTables();
-    console.log('✅ SQLite connected');
+    console.log('SQLite connected');
   }
 
   async disconnect(): Promise<void> {

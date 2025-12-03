@@ -35,7 +35,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>Bem-vindo de volta!</Text>
+      <Text style={styles.subtitle}>Bem-vindo!</Text>
 
       <View style={styles.form}>
         <Text style={styles.label}>Email</Text>
@@ -70,10 +70,6 @@ export default function LoginScreen() {
             <Text style={styles.buttonText}>Entrar</Text>
           )}
         </TouchableOpacity>
-
-        <View style={styles.hint}>
-          <Text style={styles.hintText}>💡 Dica: Crie um usuário admin primeiro no banco</Text>
-        </View>
       </View>
     </View>
   );

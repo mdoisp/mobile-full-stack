@@ -34,14 +34,14 @@ export default function CategorySelectionScreen() {
   const categories = React.useMemo(() => {
     if (user?.role === 'admin') {
       return [
-        { key: 'secretaria', title: 'Secretaria', color: '#FF9500', icon: '👔' },
-        { key: 'professor', title: 'Professores', color: '#007AFF', icon: '👨‍🏫' },
-        { key: 'estudante', title: 'Estudantes', color: '#34C759', icon: '🎓' }
+        { key: 'secretaria', title: 'Secretaria', color: '#FF9500', icon: 'SEC' },
+        { key: 'professor', title: 'Professores', color: '#007AFF', icon: 'PROF' },
+        { key: 'estudante', title: 'Estudantes', color: '#34C759', icon: 'EST' }
       ];
     } else if (user?.role === 'secretaria') {
       return [
-        { key: 'professor', title: 'Professores', color: '#007AFF', icon: '👨‍🏫' },
-        { key: 'estudante', title: 'Estudantes', color: '#34C759', icon: '🎓' }
+        { key: 'professor', title: 'Professores', color: '#007AFF', icon: 'PROF' },
+        { key: 'estudante', title: 'Estudantes', color: '#34C759', icon: 'EST' }
       ];
     }
     return [];
@@ -92,7 +92,7 @@ export default function CategorySelectionScreen() {
       
       Alert.alert(
         'Verificação de Banco',
-        `Frontend mostrando: ${dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}\n\nBackend usando: ${backendDb === 'mongodb' ? 'MongoDB' : 'SQLite'}\n\n${dbType === backendDb ? '✅ Sincronizados!' : '❌ Dessincronizados!'}`,
+        `Frontend mostrando: ${dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}\n\nBackend usando: ${backendDb === 'mongodb' ? 'MongoDB' : 'SQLite'}\n\n${dbType === backendDb ? 'Sincronizados!' : 'Dessincronizados!'}`,
         [{ text: 'OK' }]
       );
     } catch (error) {
@@ -131,13 +131,13 @@ export default function CategorySelectionScreen() {
           <View style={styles.dbSection}>
             <Text style={styles.dbLabel}>Banco de Dados Ativo</Text>
             <Text style={styles.dbValue}>
-              {dbType === 'mongodb' ? '🍃 MongoDB' : '💾 SQLite'}
+              {dbType === 'mongodb' ? 'MongoDB' : 'SQLite'}
             </Text>
             <TouchableOpacity
               style={styles.dbButton}
               onPress={handleChangeDatabaseType}
             >
-              <Text style={styles.dbButtonText}>🔄 Trocar Banco de Dados</Text>
+              <Text style={styles.dbButtonText}>Trocar Banco de Dados</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -154,6 +154,13 @@ export default function CategorySelectionScreen() {
             </TouchableOpacity>
           ))}
         </View>
+
+        <TouchableOpacity
+          style={styles.createUserButton}
+          onPress={() => navigation.navigate('UserRegister' as never)}
+        >
+          <Text style={styles.createUserButtonText}>+ Criar Nova Conta</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -199,8 +206,15 @@ const styles = StyleSheet.create({
     elevation: 3
   },
   categoryIcon: {
-    fontSize: 48,
-    marginRight: 20
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginRight: 16,
+    overflow: 'hidden'
   },
   categoryTitle: {
     fontSize: 24,
@@ -241,5 +255,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600'
+  },
+  createUserButton: {
+    backgroundColor: '#34C759',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 20
+  },
+  createUserButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold'
   }
 });
