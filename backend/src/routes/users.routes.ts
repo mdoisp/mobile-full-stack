@@ -25,7 +25,7 @@ router.get('/:id', authenticate, getUserById);
 // Atualizar usuário (admin pode trocar email, outros só podem editar próprio perfil)
 router.put('/:id', authenticate, updateUser);
 
-// Deletar usuário (apenas admin)
-router.delete('/:id', authenticate, authorize('admin'), deleteUser);
+// Deletar usuário (admin pode deletar qualquer um, secretaria pode deletar professores e estudantes)
+router.delete('/:id', authenticate, authorize('admin', 'secretaria'), deleteUser);
 
 export default router;

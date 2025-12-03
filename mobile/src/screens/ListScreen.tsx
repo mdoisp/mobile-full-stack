@@ -9,6 +9,7 @@ type RootStackParamList = {
   Students: undefined;
   StudentForm: { existing?: StudentDTO } | undefined;
   StudentView: { student: StudentDTO };
+  UserRegister: { preSelectedRole?: 'estudante' } | undefined;
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Students'>;
@@ -125,7 +126,7 @@ export default function ListScreen({ navigation }: Props) {
       {canEdit && (
         <TouchableOpacity 
           style={[styles.fab, { bottom: 24 + insets.bottom }]} 
-          onPress={() => navigation.navigate('StudentForm')}
+          onPress={() => navigation.navigate('UserRegister', { preSelectedRole: 'estudante' })}
         >
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>

@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
-import { getAllUsers, type UserDTO } from '../api/client';
+import { getAllUsers, deleteUser, type UserDTO } from '../api/client';
 
 type RootStackParamList = {
   UsersList: { category?: 'secretaria' | 'professor' | 'estudante' };
@@ -100,33 +100,82 @@ export default function UsersListScreen({ route }: Props) {
     return colors[role] || '#666';
   };
 
+  const canDelete = (userToDelete: UserDTO) => {
+    if (!user) return false;
+    
+    // Admin pode deletar qualquer um
+    if (user.role === 'admin') return true;
+    
+    // Secretaria pode deletar apenas professores e estudantes
+    if (user.role === 'secretaria') {
+      return userToDelete.role === 'professor' || userToDelete.role === 'estudante';
+    }
+    
+    return false;
+  };
+
+  const handleDelete = (userToDelete: UserDTO) => {
+    Alert.alert(
+      'Confirmar Exclusão',
+      `Tem certeza que deseja deletar o usuário ${userToDelete.name}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Deletar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteUser(userToDelete.id);
+              Alert.alert('Sucesso', 'Usuário deletado com sucesso');
+              await loadUsers();
+            } catch (error: any) {
+              const message = error.response?.data?.message || 'Não foi possível deletar o usuário';
+              Alert.alert('Erro', message);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const renderUser = ({ item }: { item: UserDTO }) => (
-    <TouchableOpacity
-      style={styles.userCard}
-      onPress={() => navigation.navigate('UserView', { userId: item.id })}
-    >
-      <View style={styles.userInfo}>
-        {item.photoUrl ? (
-          <Image source={{ uri: item.photoUrl }} style={styles.userPhoto} />
-        ) : (
-          <View style={[styles.userPhotoPlaceholder, { backgroundColor: getRoleColor(item.role) }]}>
-            <Text style={styles.userPhotoPlaceholderText}>
-              {item.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
-        
-        <View style={styles.userDetails}>
-          <Text style={styles.userName}>{item.name}</Text>
-          <Text style={styles.userEmail}>{item.email}</Text>
-          <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
-            <Text style={styles.roleText}>{getRoleName(item.role)}</Text>
+    <View style={styles.userCard}>
+      <TouchableOpacity
+        style={styles.userTouchable}
+        onPress={() => navigation.navigate('UserView', { userId: item.id })}
+      >
+        <View style={styles.userInfo}>
+          {item.photoUrl ? (
+            <Image source={{ uri: item.photoUrl }} style={styles.userPhoto} />
+          ) : (
+            <View style={[styles.userPhotoPlaceholder, { backgroundColor: getRoleColor(item.role) }]}>
+              <Text style={styles.userPhotoPlaceholderText}>
+                {item.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+          
+          <View style={styles.userDetails}>
+            <Text style={styles.userName}>{item.name}</Text>
+            <Text style={styles.userEmail}>{item.email}</Text>
+            <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
+              <Text style={styles.roleText}>{getRoleName(item.role)}</Text>
+            </View>
           </View>
         </View>
-      </View>
+        
+        <Text style={styles.arrow}>›</Text>
+      </TouchableOpacity>
       
-      <Text style={styles.arrow}>›</Text>
-    </TouchableOpacity>
+      {canDelete(item) && (
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDelete(item)}
+        >
+          <Text style={styles.deleteButtonText}>Deletar</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 
   const getEmptyMessage = () => {
@@ -202,16 +251,19 @@ const styles = StyleSheet.create({
   userCard: {
     backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 15,
     marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2
+    elevation: 2,
+    overflow: 'hidden'
+  },
+  userTouchable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 15
   },
   userInfo: {
     flexDirection: 'row',
@@ -266,5 +318,18 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: '#ccc',
     marginLeft: 10
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0'
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600'
   }
 });

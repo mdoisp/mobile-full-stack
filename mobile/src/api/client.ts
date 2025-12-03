@@ -119,3 +119,7 @@ export async function getUserById(id: string): Promise<UserDTO> {
   return data;
 }
 
+export async function deleteUser(id: string): Promise<void> {
+  await api.delete(`/users/${id}`);
+}
+

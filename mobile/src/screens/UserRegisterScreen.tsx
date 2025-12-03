@@ -9,24 +9,34 @@ import {
   Alert,
   Platform
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import CustomPicker from '../components/CustomPicker';
 import { SUBJECTS, COURSES } from '../constants/academicOptions';
 
+type RootStackParamList = {
+  UserRegister: { preSelectedRole?: 'estudante' } | undefined;
+};
+
+type UserRegisterRouteProp = RouteProp<RootStackParamList, 'UserRegister'>;
+
 export default function UserRegisterScreen() {
   const navigation = useNavigation();
+  const route = useRoute<UserRegisterRouteProp>();
   const { user: currentUser } = useAuth();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
+  
+  const preSelectedRole = route.params?.preSelectedRole || '';
   
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
-    role: '' as 'secretaria' | 'professor' | 'estudante' | '',
+    role: preSelectedRole as 'secretaria' | 'professor' | 'estudante' | '',
     subject: '',
     enrollment: '',
     course: ''
