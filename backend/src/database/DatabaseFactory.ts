@@ -48,10 +48,17 @@ export class DatabaseFactory {
     // Executa na base primária primeiro
     const result = await operation(this.primaryDb);
 
-    // Sincroniza com a base secundária (sem bloquear)
-    operation(this.secondaryDb).catch(err => {
-      console.error('Secondary database sync failed:', err);
-    });
+    // IMPORTANTE: Para updates/deletes, os IDs já existem e devem ser iguais
+    // Para creates, o ID foi gerado no primário e deve ser reusado no secundário
+    // A estratégia atual NÃO funciona porque cada banco gera seu próprio ID
+
+    // Sincroniza com a base secundária (aguardar para garantir consistência)
+    try {
+      await operation(this.secondaryDb);
+    } catch (err) {
+      console.error('⚠️  Secondary database sync failed:', err);
+      // Não lança erro para não quebrar a operação principal
+    }
 
     return result;
   }
@@ -66,6 +73,94 @@ export class DatabaseFactory {
     this.currentDbType = newDbType;
 
     console.log(`Switched to ${newDbType.toUpperCase()}`);
+  }
+
+  // Sincronização específica para Students (usa enrollment como chave única)
+  static async syncStudentUpdateToSecondary(
+    enrollment: string, 
+    updates: Partial<{ name: string; enrollment: string; course: string; subject: string; status: 'ativo' | 'trancado' | 'transferido' | 'concluido' }>
+  ): Promise<void> {
+    if (!this.secondaryDb) return;
+
+    try {
+      const student = await this.secondaryDb.getStudentByEnrollment(enrollment);
+      if (student?.id) {
+        await this.secondaryDb.updateStudent(student.id, updates);
+      }
+    } catch (err) {
+      console.error('⚠️  Secondary student sync failed:', err);
+    }
+  }
+
+  // Sincronização específica para Users (usa email como chave única)
+  static async syncUserUpdateToSecondary(
+    email: string,
+    updates: any
+  ): Promise<void> {
+    if (!this.secondaryDb) return;
+
+    try {
+      const user = await this.secondaryDb.getUserByEmail(email);
+      if (user?.id) {
+        await this.secondaryDb.updateUser(user.id, updates);
+      }
+    } catch (err) {
+      console.error('⚠️  Secondary user sync failed:', err);
+    }
+  }
+
+  // Sincronização para Grades (usa combinação studentId + subject)
+  static async syncGradeUpdateToSecondary(
+    primaryGradeId: string,
+    enrollment: string,
+    subject: string,
+    updates: Partial<{ grade: number; attendance: number }>
+  ): Promise<void> {
+    if (!this.secondaryDb) return;
+
+    try {
+      // Buscar estudante no secundário
+      const student = await this.secondaryDb.getStudentByEnrollment(enrollment);
+      if (!student) return;
+
+      // Buscar nota específica desse estudante nessa disciplina
+      const grades = await this.secondaryDb.getGradesByStudentId(student.id);
+      const targetGrade = grades.find(g => g.subject === subject);
+      
+      if (targetGrade?.id) {
+        await this.secondaryDb.updateGrade(targetGrade.id, updates);
+      }
+    } catch (err) {
+      console.error('⚠️  Secondary grade sync failed:', err);
+    }
+  }
+
+  // Delete sincronizado para Students
+  static async syncStudentDeleteToSecondary(enrollment: string): Promise<void> {
+    if (!this.secondaryDb) return;
+
+    try {
+      const student = await this.secondaryDb.getStudentByEnrollment(enrollment);
+      if (student?.id) {
+        await this.secondaryDb.deleteStudent(student.id);
+      }
+    } catch (err) {
+      console.error('⚠️  Secondary student delete failed:', err);
+    }
+  }
+
+  // Delete sincronizado para Users
+  static async syncUserDeleteToSecondary(email: string): Promise<void> {
+    if (!this.secondaryDb) return;
+
+    try {
+      const user = await this.secondaryDb.getUserByEmail(email);
+      if (user?.id) {
+        await this.secondaryDb.deleteUser(user.id);
+      }
+    } catch (err) {
+      console.error('⚠️  Secondary user delete failed:', err);
+    }
   }
 
   static getCurrentDbType(): DatabaseType {

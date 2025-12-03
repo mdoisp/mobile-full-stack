@@ -158,13 +158,15 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     if (email && currentUserRole === 'admin') updateData.email = email;
     if (password) updateData.password = await AuthService.hashPassword(password);
 
-    const updated = await DatabaseFactory.syncToBoth(db =>
-      db.updateUser(id, updateData)
-    );
-
+    // Atualizar no primário
+    const updated = await db.updateUser(id, updateData);
     if (!updated) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Sincronizar no secundário usando email
+    DatabaseFactory.syncUserUpdateToSecondary(targetUser.email, updateData)
+      .catch(err => console.error('Secondary sync failed:', err));
 
     const { password: _, ...userWithoutPassword } = updated;
     res.status(200).json(userWithoutPassword);
@@ -189,13 +191,23 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: 'Apenas administradores podem deletar usuários' });
     }
 
-    const success = await DatabaseFactory.syncToBoth(db =>
-      db.deleteUser(id)
-    );
+    const db = DatabaseFactory.getDatabase();
+    
+    // Buscar email antes de deletar
+    const userToDelete = await db.getUserById(id);
+    if (!userToDelete) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
+    // Deletar do primário
+    const success = await db.deleteUser(id);
     if (!success) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    // Sincronizar delete no secundário
+    DatabaseFactory.syncUserDeleteToSecondary(userToDelete.email)
+      .catch(err => console.error('Secondary delete failed:', err));
 
     res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {

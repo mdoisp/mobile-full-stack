@@ -74,13 +74,32 @@ export const updateGrade = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: 'Attendance must be between 0 and 100' });
     }
 
-    const updated = await DatabaseFactory.syncToBoth(db =>
-      db.updateGrade(id, { studentId, subject, grade, attendance })
-    );
+    const db = DatabaseFactory.getDatabase();
+    
+    // Buscar nota e estudante antes de atualizar
+    const existingGrade = await db.getGradeById(id);
+    if (!existingGrade) {
+      return res.status(404).json({ message: 'Grade not found' });
+    }
 
+    const student = await db.getStudentById(existingGrade.studentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Atualizar no primário
+    const updated = await db.updateGrade(id, { studentId, subject, grade, attendance });
     if (!updated) {
       return res.status(404).json({ message: 'Grade not found' });
     }
+
+    // Sincronizar no secundário usando enrollment + subject
+    DatabaseFactory.syncGradeUpdateToSecondary(
+      id, 
+      student.enrollment, 
+      existingGrade.subject,
+      { grade, attendance }
+    ).catch(err => console.error('Secondary sync failed:', err));
 
     res.status(200).json(updated);
   } catch (error) {

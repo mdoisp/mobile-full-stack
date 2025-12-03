@@ -85,15 +85,23 @@ export const updateStudent = async (req: AuthRequest, res: Response) => {
     
     const { name, enrollment, course, subject } = req.body;
 
-    const db = DatabaseFactory.getDatabase();
-
-    const updated = await DatabaseFactory.syncToBoth(db =>
-      db.updateStudent(id, { name, enrollment, course, subject })
-    );
-
-    if (!updated) {
+    const primaryDb = DatabaseFactory.getDatabase();
+    
+    // Buscar estudante no banco primário
+    const existingStudent = await primaryDb.getStudentById(id);
+    if (!existingStudent) {
       return res.status(404).json({ message: 'Student not found' });
     }
+
+    // Usar enrollment para sincronizar (é único e consistente entre bancos)
+    const enrollmentToUpdate = enrollment || existingStudent.enrollment;
+
+    // Atualizar no banco primário primeiro
+    const updated = await primaryDb.updateStudent(id, { name, enrollment, course, subject });
+
+    // Sincronizar no secundário usando enrollment
+    DatabaseFactory.syncStudentUpdateToSecondary(enrollmentToUpdate, { name, enrollment, course, subject })
+      .catch(err => console.error('Secondary sync failed:', err));
 
     res.status(200).json(updated);
   } catch (error) {
@@ -116,16 +124,19 @@ export const changeStudentStatus = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const db = DatabaseFactory.getDatabase();
-    const student = await db.getStudentById(id);
+    const primaryDb = DatabaseFactory.getDatabase();
+    const student = await primaryDb.getStudentById(id);
     
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    const updated = await DatabaseFactory.syncToBoth(db =>
-      db.updateStudent(id, { status })
-    );
+    // Atualizar no primário
+    const updated = await primaryDb.updateStudent(id, { status });
+
+    // Sincronizar no secundário usando enrollment
+    DatabaseFactory.syncStudentUpdateToSecondary(student.enrollment, { status })
+      .catch(err => console.error('Secondary sync failed:', err));
 
     res.status(200).json(updated);
   } catch (error) {
@@ -148,13 +159,21 @@ export const deleteStudent = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const success = await DatabaseFactory.syncToBoth(db =>
-      db.deleteStudent(id)
-    );
+    // Buscar enrollment antes de deletar
+    const student = await db.getStudentById(id);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
 
+    // Deletar do primário
+    const success = await db.deleteStudent(id);
     if (!success) {
       return res.status(404).json({ message: 'Student not found' });
     }
+
+    // Sincronizar delete no secundário
+    DatabaseFactory.syncStudentDeleteToSecondary(student.enrollment)
+      .catch(err => console.error('Secondary delete failed:', err));
 
     res.status(200).json({ message: 'Student deleted successfully' });
   } catch (error) {
