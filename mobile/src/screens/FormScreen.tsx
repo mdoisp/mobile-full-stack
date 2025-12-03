@@ -3,6 +3,8 @@ import { Text, TextInput, TouchableOpacity, Alert, ScrollView, StyleSheet } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createStudent, updateStudent, StudentDTO } from '../api/client';
+import CustomPicker from '../components/CustomPicker';
+import { SUBJECTS, COURSES } from '../constants/academicOptions';
 
 type RootStackParamList = {
   Students: undefined;
@@ -76,20 +78,22 @@ export default function FormScreen({ navigation, route }: Props) {
         editable={!editing}
       />
 
-      <Text style={styles.label}>Curso</Text>
-      <TextInput 
-        style={styles.input} 
-        value={form.course} 
-        onChangeText={(t) => setForm(prev => ({ ...prev, course: t }))} 
-        placeholder="Ex.: Ciência da Computação" 
+      <CustomPicker
+        label="Curso"
+        value={form.course}
+        onValueChange={(value) => setForm(prev => ({ ...prev, course: value }))}
+        options={COURSES}
+        placeholder="Selecione o curso"
+        required
       />
 
-      <Text style={styles.label}>Disciplina (opcional)</Text>
-      <TextInput 
-        style={styles.input} 
-        value={form.subject || ''} 
-        onChangeText={(t) => setForm(prev => ({ ...prev, subject: t }))} 
-        placeholder="Ex.: Programação I, Banco de Dados" 
+      <CustomPicker
+        label="Disciplina"
+        value={form.subject || ''}
+        onValueChange={(value) => setForm(prev => ({ ...prev, subject: value }))}
+        options={SUBJECTS}
+        placeholder="Selecione a disciplina (opcional)"
+        required={false}
       />
 
       <TouchableOpacity 

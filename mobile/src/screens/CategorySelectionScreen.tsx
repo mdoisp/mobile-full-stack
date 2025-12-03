@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Alert
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,6 +26,7 @@ export default function CategorySelectionScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { user, dbType } = useAuth();
   const { resetToDbSelection } = React.useContext(DbSelectionContext);
+  const insets = useSafeAreaInsets();
 
   // Debug: log do dbType
   React.useEffect(() => {
@@ -34,14 +36,14 @@ export default function CategorySelectionScreen() {
   const categories = React.useMemo(() => {
     if (user?.role === 'admin') {
       return [
-        { key: 'secretaria', title: 'Secretaria', color: '#FF9500', icon: 'SEC' },
-        { key: 'professor', title: 'Professores', color: '#007AFF', icon: 'PROF' },
-        { key: 'estudante', title: 'Estudantes', color: '#34C759', icon: 'EST' }
+        { key: 'secretaria', title: 'Secretaria', color: '#FF9500' },
+        { key: 'professor', title: 'Professores', color: '#007AFF' },
+        { key: 'estudante', title: 'Estudantes', color: '#34C759' }
       ];
     } else if (user?.role === 'secretaria') {
       return [
-        { key: 'professor', title: 'Professores', color: '#007AFF', icon: 'PROF' },
-        { key: 'estudante', title: 'Estudantes', color: '#34C759', icon: 'EST' }
+        { key: 'professor', title: 'Professores', color: '#007AFF' },
+        { key: 'estudante', title: 'Estudantes', color: '#34C759' }
       ];
     }
     return [];
@@ -149,14 +151,13 @@ export default function CategorySelectionScreen() {
               style={[styles.categoryCard, { backgroundColor: category.color }]}
               onPress={() => handleCategoryPress(category.key)}
             >
-              <Text style={styles.categoryIcon}>{category.icon}</Text>
               <Text style={styles.categoryTitle}>{category.title}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         <TouchableOpacity
-          style={styles.createUserButton}
+          style={[styles.createUserButton, { marginBottom: Math.max(insets.bottom, 20) }]}
           onPress={() => navigation.navigate('UserRegister' as never)}
         >
           <Text style={styles.createUserButtonText}>+ Criar Nova Conta</Text>
@@ -174,7 +175,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
-    paddingBottom: 40,
     justifyContent: 'center'
   },
   title: {
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     gap: 15
   },
   categoryCard: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 25,
     borderRadius: 12,
     shadowColor: '#000',
@@ -205,22 +205,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3
   },
-  categoryIcon: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    marginRight: 16,
-    overflow: 'hidden'
-  },
   categoryTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    flex: 1
+    textAlign: 'center'
   },
   dbSection: {
     marginBottom: 25,
@@ -244,7 +233,7 @@ const styles = StyleSheet.create({
     fontWeight: '600'
   },
   dbButton: {
-    backgroundColor: '#FF9500',
+    backgroundColor: '#d0d0d0',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 8,
@@ -252,7 +241,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   dbButtonText: {
-    color: '#fff',
+    color: '#333',
     fontSize: 16,
     fontWeight: '600'
   },

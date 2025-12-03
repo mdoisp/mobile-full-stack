@@ -8,8 +8,11 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { createGrade, updateGrade, deleteGrade, type GradeDTO } from '../api/client';
+import CustomPicker from '../components/CustomPicker';
+import { SUBJECTS } from '../constants/academicOptions';
 
 type RootStackParamList = {
   GradeForm: { studentId: string; studentName: string; existing?: GradeDTO };
@@ -21,6 +24,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'GradeForm'>;
 export default function GradeFormScreen({ navigation, route }: Props) {
   const { studentId, studentName, existing } = route.params;
   const editing = Boolean(existing);
+  const insets = useSafeAreaInsets();
 
   const [subject, setSubject] = useState(existing?.subject || '');
   const [grade, setGrade] = useState(existing?.grade?.toString() || '');
@@ -97,19 +101,20 @@ export default function GradeFormScreen({ navigation, route }: Props) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}>
       <View style={styles.content}>
         <Text style={styles.title}>
           {editing ? 'Editar Nota' : 'Adicionar Nota'}
         </Text>
         <Text style={styles.subtitle}>Aluno: {studentName}</Text>
 
-        <Text style={styles.label}>Matéria/Disciplina</Text>
-        <TextInput
-          style={styles.input}
+        <CustomPicker
+          label="Matéria/Disciplina"
           value={subject}
-          onChangeText={setSubject}
-          placeholder="Ex: Programação I"
+          onValueChange={setSubject}
+          options={SUBJECTS}
+          placeholder="Selecione a disciplina"
+          required
         />
 
         <Text style={styles.label}>Nota (0 a 10)</Text>

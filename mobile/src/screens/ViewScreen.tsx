@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StudentDTO, GradeDTO, getGradesByStudentId } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'StudentView'>;
 export default function ViewScreen({ route, navigation }: Props) {
   const { student } = route.params;
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [grades, setGrades] = useState<GradeDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +40,7 @@ export default function ViewScreen({ route, navigation }: Props) {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}>
       <View style={styles.section}>
         <Text style={styles.title}>{student.name}</Text>
         <Text style={styles.item}>Matrícula: {student.enrollment}</Text>
@@ -98,8 +100,7 @@ export default function ViewScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#f5f5f5',
-    paddingBottom: 20
+    backgroundColor: '#f5f5f5'
   },
   section: { 
     backgroundColor: '#fff', 

@@ -10,13 +10,16 @@ import {
   Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
+import CustomPicker from '../components/CustomPicker';
+import { SUBJECTS, COURSES } from '../constants/academicOptions';
 
 export default function UserRegisterScreen() {
   const navigation = useNavigation();
   const { user: currentUser } = useAuth();
+  const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
   
   const [form, setForm] = useState({
@@ -24,7 +27,9 @@ export default function UserRegisterScreen() {
     email: '',
     password: '',
     role: '' as 'secretaria' | 'professor' | 'estudante' | '',
-    subject: ''
+    subject: '',
+    enrollment: '',
+    course: ''
   });
 
   // Define quais roles o usuário pode criar
@@ -39,7 +44,8 @@ export default function UserRegisterScreen() {
   const canSubmit = form.name.trim() && 
                     form.email.trim() && 
                     form.password.trim() && 
-                    form.role;
+                    form.role &&
+                    (form.role !== 'estudante' || (form.enrollment.trim() && form.course.trim()));
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -60,11 +66,22 @@ export default function UserRegisterScreen() {
         payload.subject = form.subject.trim();
       }
 
+      // Criar usuário
       await api.post('/auth/register', payload);
+      
+      // Se for estudante, criar também o registro acadêmico
+      if (form.role === 'estudante') {
+        await api.post('/students', {
+          name: form.name.trim(),
+          enrollment: form.enrollment.trim(),
+          course: form.course.trim(),
+          subject: form.subject.trim() || undefined
+        });
+      }
       
       Alert.alert(
         'Sucesso',
-        `Usuário ${form.name} criado com sucesso!`,
+        `${form.role === 'estudante' ? 'Estudante' : 'Usuário'} ${form.name} criado com sucesso!`,
         [
           {
             text: 'OK',
@@ -85,8 +102,8 @@ export default function UserRegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <Text style={styles.title}>Criar Nova Conta</Text>
         <Text style={styles.subtitle}>
           {currentUser?.role === 'admin' 
@@ -154,18 +171,38 @@ export default function UserRegisterScreen() {
         </View>
 
         {(form.role === 'professor' || form.role === 'estudante') && (
-          <View style={styles.section}>
-            <Text style={styles.label}>
-              Disciplina {form.role === 'professor' ? '*' : '(opcional)'}
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={form.subject}
-              onChangeText={(text) => setForm(prev => ({ ...prev, subject: text }))}
-              placeholder="Ex: Programação I, Banco de Dados"
-              autoCapitalize="words"
+          <CustomPicker
+            label="Disciplina"
+            value={form.subject}
+            onValueChange={(value) => setForm(prev => ({ ...prev, subject: value }))}
+            options={SUBJECTS}
+            placeholder="Selecione a disciplina"
+            required={form.role === 'professor'}
+          />
+        )}
+
+        {form.role === 'estudante' && (
+          <>
+            <View style={styles.section}>
+              <Text style={styles.label}>Matrícula *</Text>
+              <TextInput
+                style={styles.input}
+                value={form.enrollment}
+                onChangeText={(text) => setForm(prev => ({ ...prev, enrollment: text }))}
+                placeholder="Digite a matrícula"
+                autoCapitalize="characters"
+              />
+            </View>
+
+            <CustomPicker
+              label="Curso"
+              value={form.course}
+              onValueChange={(value) => setForm(prev => ({ ...prev, course: value }))}
+              options={COURSES}
+              placeholder="Selecione o curso"
+              required
             />
-          </View>
+          </>
         )}
 
         <TouchableOpacity
@@ -188,8 +225,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5'
   },
   content: {
-    padding: 20,
-    paddingBottom: 40
+    padding: 20
   },
   title: {
     fontSize: 28,

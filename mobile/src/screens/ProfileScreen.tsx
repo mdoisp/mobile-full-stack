@@ -9,11 +9,13 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { getMyProfile, updateMyProfile, type UserDTO } from '../api/client';
 
 export default function ProfileScreen() {
   const { user: authUser, signOut, resetToDbSelection, dbType } = useAuth();
+  const insets = useSafeAreaInsets();
   const [user, setUser] = useState<UserDTO | null>(null);
   const [name, setName] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -118,7 +120,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}>
       <View style={styles.content}>
         <View style={styles.photoContainer}>
           {user.photoUrl ? (
@@ -230,8 +232,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingBottom: 20,
+    backgroundColor: '#f5f5f5'
   },
   content: {
     padding: 20

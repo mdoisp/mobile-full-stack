@@ -8,10 +8,13 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { getUserById, type UserDTO } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
+import CustomPicker from '../components/CustomPicker';
+import { SUBJECTS } from '../constants/academicOptions';
 
 type RootStackParamList = {
   UserEdit: { userId: string };
@@ -23,6 +26,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'UserEdit'>;
 export default function UserEditScreen({ navigation, route }: Props) {
   const { userId } = route.params;
   const { user: currentUser } = useAuth();
+  const insets = useSafeAreaInsets();
   const [user, setUser] = useState<UserDTO | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -97,7 +101,7 @@ export default function UserEditScreen({ navigation, route }: Props) {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) }}>
       <View style={styles.content}>
         <Text style={styles.title}>Editar Perfil</Text>
         
@@ -129,15 +133,14 @@ export default function UserEditScreen({ navigation, route }: Props) {
         )}
 
         {(user.role === 'professor' || user.role === 'estudante') && (
-          <>
-            <Text style={styles.label}>Disciplina</Text>
-            <TextInput
-              style={styles.input}
-              value={subject}
-              onChangeText={setSubject}
-              placeholder="Ex: Programação I"
-            />
-          </>
+          <CustomPicker
+            label="Disciplina"
+            value={subject}
+            onValueChange={setSubject}
+            options={SUBJECTS}
+            placeholder="Selecione a disciplina"
+            required={user.role === 'professor'}
+          />
         )}
 
         <Text style={styles.label}>URL da Foto</Text>
