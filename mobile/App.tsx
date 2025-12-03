@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Manter splash screen visível enquanto carrega
+SplashScreen.preventAutoHideAsync();
 
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import DatabaseSelectionScreen from './src/screens/DatabaseSelectionScreen';
@@ -32,6 +36,8 @@ function AppContent() {
   const { user, signOut, loading: authLoading, resetToDbSelection: authResetDb, switchDatabase } = useAuth();
   const [dbSelected, setDbSelected] = useState(false);
 
+  const [appIsReady, setAppIsReady] = useState(false);
+
   // Verifica se já tem banco selecionado no storage ao iniciar
   useEffect(() => {
     const checkDbType = async () => {
@@ -40,12 +46,20 @@ function AppContent() {
         console.log('Database already selected from storage:', storedDbType);
         setDbSelected(true);
       }
+      setAppIsReady(true);
     };
     
     if (!authLoading) {
       checkDbType();
     }
   }, [authLoading]);
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      // Esconde a splash screen quando o app está pronto
+      await SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
 
   // Handler para reset completo (volta para seleção de banco)
   const handleResetToDbSelection = async () => {
@@ -66,20 +80,24 @@ function AppContent() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || !appIsReady) {
+    return null; // Mantém splash screen visível
+  }
+
+  if (!dbSelected) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <DatabaseSelectionScreen onSelectDatabase={handleDatabaseSelected} />
       </View>
     );
   }
 
-  if (!dbSelected) {
-    return <DatabaseSelectionScreen onSelectDatabase={handleDatabaseSelected} />;
-  }
-
   if (!user) {
-    return <LoginScreen />;
+    return (
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <LoginScreen />
+      </View>
+    );
   }
 
   // Define a tela inicial baseada no role
@@ -92,7 +110,8 @@ function AppContent() {
 
   return (
     <DbSelectionContext.Provider value={{ resetToDbSelection: handleResetToDbSelection }}>
-      <NavigationContainer>
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <NavigationContainer>
         <Stack.Navigator initialRouteName={getInitialRouteName()}>
         <Stack.Screen 
           name="CategorySelection" 
@@ -220,6 +239,7 @@ function AppContent() {
       </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>
+      </View>
     </DbSelectionContext.Provider>
   );
 }

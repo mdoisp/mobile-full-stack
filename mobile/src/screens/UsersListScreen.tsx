@@ -139,43 +139,45 @@ export default function UsersListScreen({ route }: Props) {
   };
 
   const renderUser = ({ item }: { item: UserDTO }) => (
-    <View style={styles.userCard}>
-      <TouchableOpacity
-        style={styles.userTouchable}
-        onPress={() => navigation.navigate('UserView', { userId: item.id })}
-      >
-        <View style={styles.userInfo}>
-          {item.photoUrl ? (
-            <Image source={{ uri: item.photoUrl }} style={styles.userPhoto} />
-          ) : (
-            <View style={[styles.userPhotoPlaceholder, { backgroundColor: getRoleColor(item.role) }]}>
-              <Text style={styles.userPhotoPlaceholderText}>
-                {item.name.charAt(0).toUpperCase()}
-              </Text>
-            </View>
-          )}
-          
-          <View style={styles.userDetails}>
-            <Text style={styles.userName}>{item.name}</Text>
-            <Text style={styles.userEmail}>{item.email}</Text>
+    <TouchableOpacity
+      style={styles.userCard}
+      onPress={() => navigation.navigate('UserView', { userId: item.id })}
+    >
+      <View style={styles.userInfo}>
+        {item.photoUrl ? (
+          <Image source={{ uri: item.photoUrl }} style={styles.userPhoto} />
+        ) : (
+          <View style={[styles.userPhotoPlaceholder, { backgroundColor: getRoleColor(item.role) }]}>
+            <Text style={styles.userPhotoPlaceholderText}>
+              {item.name.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
+        
+        <View style={styles.userDetails}>
+          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={styles.userEmail}>{item.email}</Text>
+          <View style={styles.roleBadgeContainer}>
             <View style={[styles.roleBadge, { backgroundColor: getRoleColor(item.role) }]}>
               <Text style={styles.roleText}>{getRoleName(item.role)}</Text>
             </View>
+            {canDelete(item) && (
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleDelete(item);
+                }}
+              >
+                <Text style={styles.deleteButtonText}>Deletar</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
-        
-        <Text style={styles.arrow}>›</Text>
-      </TouchableOpacity>
+      </View>
       
-      {canDelete(item) && (
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDelete(item)}
-        >
-          <Text style={styles.deleteButtonText}>Deletar</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+      <Text style={styles.arrow}>›</Text>
+    </TouchableOpacity>
   );
 
   const getEmptyMessage = () => {
@@ -252,18 +254,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     marginBottom: 10,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 2,
-    overflow: 'hidden'
-  },
-  userTouchable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 15
+    elevation: 2
   },
   userInfo: {
     flexDirection: 'row',
@@ -303,8 +302,13 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 6
   },
+  roleBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6
+  },
   roleBadge: {
-    alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12
@@ -321,15 +325,13 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: '#FF3B30',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0'
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12
   },
   deleteButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '600'
   }
 });
