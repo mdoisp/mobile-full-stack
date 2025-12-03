@@ -32,6 +32,21 @@ function AppContent() {
   const { user, signOut, loading: authLoading, resetToDbSelection: authResetDb, switchDatabase } = useAuth();
   const [dbSelected, setDbSelected] = useState(false);
 
+  // Verifica se já tem banco selecionado no storage ao iniciar
+  useEffect(() => {
+    const checkDbType = async () => {
+      const storedDbType = await storage.getDatabaseType();
+      if (storedDbType) {
+        console.log('Database already selected from storage:', storedDbType);
+        setDbSelected(true);
+      }
+    };
+    
+    if (!authLoading) {
+      checkDbType();
+    }
+  }, [authLoading]);
+
   // Handler para reset completo (volta para seleção de banco)
   const handleResetToDbSelection = async () => {
     await authResetDb();

@@ -26,19 +26,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   async function loadStoredData() {
     try {
-      const [storedToken, storedUser, storedDbType] = await Promise.all([
-        storage.getToken(),
-        storage.getUser(),
-        storage.getDatabaseType(),
-      ]);
-
-      if (storedToken && storedUser) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-        setUser(storedUser);
-      }
-
+      // Primeiro verifica se tem dbType salvo
+      const storedDbType = await storage.getDatabaseType();
+      
       if (storedDbType) {
+        // Se tem dbType, carrega as credenciais
+        const [storedToken, storedUser] = await Promise.all([
+          storage.getToken(),
+          storage.getUser(),
+        ]);
+
+        if (storedToken && storedUser) {
+          api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          setUser(storedUser);
+        }
+        
         setDbType(storedDbType);
+      } else {
+        // Se não tem dbType salvo, limpa tudo (primeira execução ou reset)
+        console.log('No database type found, clearing auth data');
+        await storage.clearAuth();
+        delete api.defaults.headers.common['Authorization'];
+        setUser(null);
       }
     } catch (error) {
       console.error('Error loading stored data:', error);
