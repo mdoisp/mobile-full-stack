@@ -103,13 +103,8 @@ export default function UsersListScreen({ route }: Props) {
   const canDelete = (userToDelete: UserDTO) => {
     if (!user) return false;
     
-    // Admin pode deletar qualquer um
+    // Apenas Admin pode deletar
     if (user.role === 'admin') return true;
-    
-    // Secretaria pode deletar apenas professores e estudantes
-    if (user.role === 'secretaria') {
-      return userToDelete.role === 'professor' || userToDelete.role === 'estudante';
-    }
     
     return false;
   };

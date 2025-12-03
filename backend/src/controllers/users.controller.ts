@@ -173,7 +173,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// DELETE /users/:id - Deletar usuário (Admin pode deletar qualquer um, Secretaria pode deletar professores e estudantes)
+// DELETE /users/:id - Deletar usuário (Apenas Admin pode deletar)
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -184,17 +184,9 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // Buscar usuário a ser deletado
-    const userToDelete = await DatabaseFactory.getDatabase().getUserById(id);
-    if (!userToDelete) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Permissões: Admin pode deletar qualquer um, Secretaria pode deletar professores e estudantes
-    if (currentUser.role === 'secretaria') {
-      if (userToDelete.role === 'admin' || userToDelete.role === 'secretaria') {
-        return res.status(403).json({ message: 'Secretaria não pode deletar administradores ou outras secretárias' });
-      }
+    // Apenas Admin pode deletar
+    if (currentUser.role !== 'admin') {
+      return res.status(403).json({ message: 'Apenas administradores podem deletar usuários' });
     }
 
     const success = await DatabaseFactory.syncToBoth(db =>

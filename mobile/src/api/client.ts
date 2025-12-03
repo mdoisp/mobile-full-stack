@@ -26,6 +26,7 @@ export interface StudentDTO {
   enrollment: string;
   course: string;
   subject?: string; // Disciplina do estudante
+  status?: 'ativo' | 'trancado' | 'transferido' | 'concluido';
   createdAt?: Date;
 }
 
@@ -71,6 +72,11 @@ export async function updateStudent(id: string, payload: Partial<StudentDTO>): P
 
 export async function deleteStudent(id: string): Promise<void> {
   await api.delete(`/students/${id}`);
+}
+
+export async function changeStudentStatus(id: string, status: 'ativo' | 'trancado' | 'transferido' | 'concluido'): Promise<StudentDTO> {
+  const { data } = await api.patch<StudentDTO>(`/students/${id}/status`, { status });
+  return data;
 }
 
 // Grades API

@@ -40,6 +40,7 @@ export class SQLiteDatabase implements IDatabase {
         enrollment TEXT UNIQUE NOT NULL,
         course TEXT NOT NULL,
         subject TEXT,
+        status TEXT DEFAULT 'ativo' CHECK(status IN ('ativo', 'trancado', 'transferido', 'concluido')),
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -125,11 +126,11 @@ export class SQLiteDatabase implements IDatabase {
     
     const id = this.generateId();
     const stmt = this.db.prepare(
-      'INSERT INTO students (id, name, enrollment, course, subject) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO students (id, name, enrollment, course, subject, status) VALUES (?, ?, ?, ?, ?, ?)'
     );
-    stmt.run(id, student.name, student.enrollment, student.course, student.subject || null);
+    stmt.run(id, student.name, student.enrollment, student.course, student.subject || null, student.status || 'ativo');
     
-    return { id, ...student, createdAt: new Date() };
+    return { id, ...student, status: student.status || 'ativo', createdAt: new Date() };
   }
 
   async getStudentById(id: string): Promise<IStudent | null> {

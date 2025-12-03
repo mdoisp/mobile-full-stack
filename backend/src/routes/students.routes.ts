@@ -5,6 +5,7 @@ import {
   createStudent,
   updateStudent,
   deleteStudent,
+  changeStudentStatus,
 } from '../controllers/students.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { authorize } from '../middleware/role.middleware.js';
@@ -25,6 +26,9 @@ studentsRouter.post('/', authorize('admin', 'secretaria'), createStudent);
 
 // PUT - Admin e Secretaria podem atualizar
 studentsRouter.put('/:id', authorize('admin', 'secretaria'), updateStudent);
+
+// PATCH - Secretaria pode alterar status
+studentsRouter.patch('/:id/status', authorize('admin', 'secretaria'), changeStudentStatus);
 
 // DELETE - Apenas Admin pode deletar
 studentsRouter.delete('/:id', authorize('admin'), deleteStudent);

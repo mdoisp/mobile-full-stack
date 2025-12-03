@@ -16,6 +16,7 @@ const studentSchema = new Schema<IStudent>({
   enrollment: { type: String, required: true, unique: true },
   course: { type: String, required: true },
   subject: { type: String, required: false }, // Disciplina do estudante
+  status: { type: String, enum: ['ativo', 'trancado', 'transferido', 'concluido'], default: 'ativo' }
 }, { timestamps: true });
 
 const gradeSchema = new Schema<IGrade>({

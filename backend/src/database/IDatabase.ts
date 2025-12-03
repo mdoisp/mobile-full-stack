@@ -16,6 +16,7 @@ export interface IStudent {
   enrollment: string;
   course: string;
   subject?: string; // Disciplina do estudante
+  status?: 'ativo' | 'trancado' | 'transferido' | 'concluido';
   createdAt: Date;
 }
 

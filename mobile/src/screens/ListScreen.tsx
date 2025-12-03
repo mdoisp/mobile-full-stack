@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { fetchStudents, deleteStudent, StudentDTO } from '../api/client';
+import { fetchStudents, deleteStudent, changeStudentStatus, StudentDTO } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 
 type RootStackParamList = {
@@ -23,6 +23,7 @@ export default function ListScreen({ navigation }: Props) {
 
   const canEdit = user?.role === 'admin' || user?.role === 'secretaria';
   const canDelete = user?.role === 'admin';
+  const canChangeStatus = user?.role === 'secretaria';
 
   const load = useCallback(async () => {
     try {
@@ -50,7 +51,7 @@ export default function ListScreen({ navigation }: Props) {
 
   const handleDelete = (item: StudentDTO) => {
     if (!canDelete) {
-      Alert.alert('Acesso Negado', 'Você não tem permissão para deletar estudantes');
+      Alert.alert('Acesso Negado', 'Apenas administradores podem deletar estudantes');
       return;
     }
 
@@ -62,6 +63,7 @@ export default function ListScreen({ navigation }: Props) {
         onPress: async () => {
           try {
             await deleteStudent(item.id!);
+            Alert.alert('Sucesso', 'Estudante deletado com sucesso');
             await load();
           } catch (e: any) {
             Alert.alert('Erro', e.response?.data?.message || 'Não foi possível deletar');
@@ -71,10 +73,70 @@ export default function ListScreen({ navigation }: Props) {
     ]);
   };
 
+  const handleChangeStatus = (item: StudentDTO) => {
+    if (!canChangeStatus && !canDelete) {
+      Alert.alert('Acesso Negado', 'Você não tem permissão para alterar status');
+      return;
+    }
+
+    const currentStatus = item.status || 'ativo';
+    const statusOptions = [
+      { label: 'Ativo', value: 'ativo' as const },
+      { label: 'Trancado', value: 'trancado' as const },
+      { label: 'Transferido', value: 'transferido' as const },
+      { label: 'Concluído', value: 'concluido' as const }
+    ];
+
+    Alert.alert(
+      'Alterar Status',
+      `Status atual: ${statusOptions.find(s => s.value === currentStatus)?.label}\n\nSelecione o novo status:`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        ...statusOptions.map(status => ({
+          text: status.label,
+          onPress: async () => {
+            try {
+              await changeStudentStatus(item.id!, status.value);
+              Alert.alert('Sucesso', 'Status atualizado com sucesso');
+              await load();
+            } catch (e: any) {
+              Alert.alert('Erro', e.response?.data?.message || 'Não foi possível atualizar status');
+            }
+          }
+        }))
+      ]
+    );
+  };
+
+  const getStatusColor = (status?: string) => {
+    const colors: Record<string, string> = {
+      ativo: '#34C759',
+      trancado: '#FF9500',
+      transferido: '#007AFF',
+      concluido: '#666'
+    };
+    return colors[status || 'ativo'] || '#34C759';
+  };
+
+  const getStatusLabel = (status?: string) => {
+    const labels: Record<string, string> = {
+      ativo: 'Ativo',
+      trancado: 'Trancado',
+      transferido: 'Transferido',
+      concluido: 'Concluído'
+    };
+    return labels[status || 'ativo'] || 'Ativo';
+  };
+
   const renderItem = ({ item }: { item: StudentDTO }) => (
     <View style={styles.card}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.name}>{item.name}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <Text style={styles.name}>{item.name}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+            <Text style={styles.statusText}>{getStatusLabel(item.status)}</Text>
+          </View>
+        </View>
         <Text style={styles.sub}>Matrícula: {item.enrollment}</Text>
         <Text style={styles.sub}>Curso: {item.course}</Text>
         {item.subject && (
@@ -90,6 +152,11 @@ export default function ListScreen({ navigation }: Props) {
         {canEdit && (
           <TouchableOpacity onPress={() => navigation.navigate('StudentForm', { existing: item })}>
             <Text style={styles.link}>Editar</Text>
+          </TouchableOpacity>
+        )}
+        {canChangeStatus && (
+          <TouchableOpacity onPress={() => handleChangeStatus(item)}>
+            <Text style={[styles.link, { color: '#FF9500' }]}>Status</Text>
           </TouchableOpacity>
         )}
         {canDelete && (
@@ -148,6 +215,16 @@ const styles = StyleSheet.create({
   },
   name: { fontSize: 16, fontWeight: '600' },
   sub: { color: '#666', marginTop: 2 },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
   actions: { justifyContent: 'space-between', alignItems: 'flex-end', gap: 8 },
   link: { color: '#0a7', fontWeight: '600' },
   fab: {

@@ -12,6 +12,7 @@ interface IStudent {
     state: string;
   };
   courses: string[];
+  status?: 'ativo' | 'trancado' | 'transferido' | 'concluido';
 }
 
 // Isso diz ao MongoDB como os dados devem ser estruturados e validados
@@ -36,6 +37,11 @@ const studentSchema = new Schema<IStudent>(
     courses: [
       { type: String },
     ],
+    status: {
+      type: String,
+      enum: ['ativo', 'trancado', 'transferido', 'concluido'],
+      default: 'ativo'
+    }
   },
   {
     // Adiciona automaticamente os campos: createdAt e updatedAt

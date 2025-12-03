@@ -101,10 +101,52 @@ export const updateStudent = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const changeStudentStatus = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!id) return res.status(400).json({ message: 'ID is required' });
+    if (!status) return res.status(400).json({ message: 'Status is required' });
+
+    const validStatuses = ['ativo', 'trancado', 'transferido', 'concluido'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        message: 'Invalid status. Must be one of: ativo, trancado, transferido, concluido' 
+      });
+    }
+
+    const db = DatabaseFactory.getDatabase();
+    const student = await db.getStudentById(id);
+    
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const updated = await DatabaseFactory.syncToBoth(db =>
+      db.updateStudent(id, { status })
+    );
+
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ message: 'Error changing student status', error: String(error) });
+  }
+};
+
 export const deleteStudent = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: 'ID is required' });
+
+    const db = DatabaseFactory.getDatabase();
+    
+    // Validar se estudante tem notas
+    const grades = await db.getGradesByStudentId(id);
+    if (grades.length > 0) {
+      return res.status(400).json({ 
+        message: 'Não é possível deletar estudante com notas cadastradas. Altere o status para "trancado" ou "transferido" ao invés de deletar.' 
+      });
+    }
 
     const success = await DatabaseFactory.syncToBoth(db =>
       db.deleteStudent(id)
